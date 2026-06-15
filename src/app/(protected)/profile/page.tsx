@@ -6,14 +6,16 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useProfile, useUpdateProfile } from '@/hooks/use-profile'
 import { Input } from '@/components/ui/input'
-import { X, Plus, CheckCircle2, Loader2, User, Palette } from 'lucide-react'
+import { X, Plus, CheckCircle2, Loader2, User, Palette, Home } from 'lucide-react'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
+import { geocodeLocation } from '@/lib/geocode'
 
 const schema = z.object({
   full_name: z.string().min(2, 'Name is required'),
   target_role: z.string().optional(),
   target_salary: z.coerce.number().optional(),
   work_type: z.enum(['remote', 'hybrid', 'onsite']).optional(),
+  home_address: z.string().optional(),
 })
 
 type FormData = z.infer<typeof schema>
@@ -25,6 +27,7 @@ export default function ProfilePage() {
   const [skills, setSkills] = useState<string[]>([])
   const [skillInput, setSkillInput] = useState('')
   const [saved, setSaved] = useState(false)
+  const [geocodingHome, setGeocodingHome] = useState(false)
 
   const {
     register,
@@ -40,6 +43,7 @@ export default function ProfilePage() {
         target_role: profile.target_role ?? '',
         target_salary: profile.target_salary ?? undefined,
         work_type: profile.work_type ?? undefined,
+        home_address: profile.home_address ?? '',
       })
       setSkills(profile.skills ?? [])
     }
@@ -57,7 +61,24 @@ export default function ProfilePage() {
   }
 
   async function onSubmit(data: FormData) {
-    await updateProfile.mutateAsync({ ...data, skills })
+    let homeCoords: { home_latitude: number | null; home_longitude: number | null } = {
+      home_latitude: profile?.home_latitude ?? null,
+      home_longitude: profile?.home_longitude ?? null,
+    }
+
+    if (data.home_address && data.home_address !== profile?.home_address) {
+      setGeocodingHome(true)
+      const geo = await geocodeLocation(data.home_address)
+      homeCoords = {
+        home_latitude: geo && !geo.isRemote ? geo.latitude : null,
+        home_longitude: geo && !geo.isRemote ? geo.longitude : null,
+      }
+      setGeocodingHome(false)
+    } else if (!data.home_address) {
+      homeCoords = { home_latitude: null, home_longitude: null }
+    }
+
+    await updateProfile.mutateAsync({ ...data, skills, ...homeCoords })
     setSaved(true)
     setTimeout(() => setSaved(false), 2500)
   }
@@ -106,26 +127,25 @@ export default function ProfilePage() {
           </section>
 
           {/* Appearance */}
-            <section className="p-6 rounded-2xl bg-card border border-border">
-                <h2 className="font-semibold text-sm text-muted uppercase tracking-wider mb-4">Appearance</h2>
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-xl bg-primary/15 flex items-center justify-center">
-                        <Palette size={16} className="text-primary" />
-                    </div>
-                    <div>
-                        <p className="text-sm font-medium">Theme</p>
-                        <p className="text-xs text-muted">Switch between dark and light mode</p>
-                    </div>
-                    </div>
-                    <ThemeToggle />
+          <section className="p-6 rounded-2xl bg-card border border-border">
+            <h2 className="font-semibold text-sm text-muted uppercase tracking-wider mb-4">Appearance</h2>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-primary/15 flex items-center justify-center">
+                  <Palette size={16} className="text-primary" />
                 </div>
-            </section>
+                <div>
+                  <p className="text-sm font-medium">Theme</p>
+                  <p className="text-xs text-muted">Switch between dark and light mode</p>
+                </div>
+              </div>
+              <ThemeToggle />
+            </div>
+          </section>
 
           {/* Preferences */}
           <section className="p-6 rounded-2xl bg-card border border-border space-y-4">
             <h2 className="font-semibold text-sm text-muted uppercase tracking-wider">Preferences</h2>
-
             <Input
               id="target_salary"
               type="number"
@@ -133,7 +153,6 @@ export default function ProfilePage() {
               placeholder="e.g. 72000"
               {...register('target_salary')}
             />
-
             <div className="space-y-1.5">
               <label className="text-sm font-medium text-foreground">Work type</label>
               <div className="flex gap-3">
@@ -153,6 +172,29 @@ export default function ProfilePage() {
                 ))}
               </div>
             </div>
+          </section>
+
+          {/* Home location */}
+          <section className="p-6 rounded-2xl bg-card border border-border space-y-4">
+            <div className="flex items-center gap-2">
+              <Home size={15} className="text-muted" />
+              <h2 className="font-semibold text-sm text-muted uppercase tracking-wider">Home location</h2>
+            </div>
+            <p className="text-xs text-muted -mt-2">
+              Used to calculate commute distance for each application.
+            </p>
+            <Input
+              id="home_address"
+              label="Address or area"
+              placeholder="e.g. Bangsar, Kuala Lumpur"
+              {...register('home_address')}
+            />
+            {profile?.home_latitude && (
+              <p className="text-xs text-emerald-400 flex items-center gap-1.5">
+                <CheckCircle2 size={12} />
+                Location set — distance filters are active
+              </p>
+            )}
           </section>
 
           {/* Skills */}
@@ -209,10 +251,10 @@ export default function ProfilePage() {
           {/* Save button */}
           <button
             onClick={handleSubmit(onSubmit)}
-            disabled={updateProfile.isPending}
+            disabled={updateProfile.isPending || geocodingHome}
             className="w-full py-3.5 bg-primary hover:bg-primary/90 disabled:opacity-50 text-white font-semibold rounded-xl transition-all hover:shadow-[0_0_30px_rgba(99,102,241,0.3)] flex items-center justify-center gap-2"
           >
-            {updateProfile.isPending ? (
+            {updateProfile.isPending || geocodingHome ? (
               <><Loader2 size={18} className="animate-spin" /> Saving…</>
             ) : saved ? (
               <><CheckCircle2 size={18} /> Saved!</>

@@ -16,13 +16,14 @@ import {
 } from 'lucide-react'
 import type { Application, Profile } from '@/types'
 import { ExportButton } from '@/components/applications/export-button'
+import { RadarWidget } from './radar-widget'
+import { DiscoverTeaser } from './discover-teaser'
 
 interface Props {
   applications: Application[]
   profile: Profile | null
 }
 
-// ── Chart colors hook (must be outside component) ──
 function useChartColors() {
   const [colors, setColors] = useState({
     grid: '#2A2A36',
@@ -117,10 +118,8 @@ export function DashboardClient({ applications, profile }: Props) {
         />
       </div>
 
-      {/* Charts row */}
+      {/* Charts row — area chart + radar */}
       <div className="grid lg:grid-cols-3 gap-4">
-
-        {/* Applications over time */}
         <div className="lg:col-span-2 p-6 rounded-2xl bg-card border border-border">
           <div className="flex items-center justify-between mb-6">
             <div>
@@ -166,7 +165,11 @@ export function DashboardClient({ applications, profile }: Props) {
           ) : <ChartEmpty />}
         </div>
 
-        {/* Status breakdown pie */}
+        <RadarWidget applications={applications} />
+      </div>
+
+      {/* Status breakdown + Discover teaser */}
+      <div className="grid lg:grid-cols-2 gap-4">
         <div className="p-6 rounded-2xl bg-card border border-border">
           <div className="flex items-center justify-between mb-6">
             <div>
@@ -205,7 +208,6 @@ export function DashboardClient({ applications, profile }: Props) {
                   />
                 </PieChart>
               </ResponsiveContainer>
-              {/* Legend */}
               <div className="space-y-1.5 mt-2">
                 {stats.statusBreakdown.map(s => (
                   <div key={s.status} className="flex items-center justify-between text-xs">
@@ -223,6 +225,8 @@ export function DashboardClient({ applications, profile }: Props) {
             </>
           ) : <ChartEmpty />}
         </div>
+
+        <DiscoverTeaser />
       </div>
 
       {/* Match score bar chart */}
@@ -344,7 +348,6 @@ export function DashboardClient({ applications, profile }: Props) {
   )
 }
 
-// ── Stat card ──
 function StatCard({
   icon: Icon, label, value, sub, color, mono = false,
 }: {
@@ -370,7 +373,6 @@ function StatCard({
   )
 }
 
-// ── Custom tooltip ──
 function CustomTooltip({ active, payload, label: axisLabel, label: propLabel }: any) {
   if (!active || !payload?.length) return null
   return (
@@ -383,7 +385,6 @@ function CustomTooltip({ active, payload, label: axisLabel, label: propLabel }: 
   )
 }
 
-// ── Chart empty ──
 function ChartEmpty() {
   return (
     <div className="flex items-center justify-center h-40 text-sm text-muted">
@@ -392,7 +393,6 @@ function ChartEmpty() {
   )
 }
 
-// ── Stats computation ──
 const STATUS_LABEL_MAP: Record<string, string> = {
   applied: 'Applied', response: 'Response', interview: 'Interview',
   tech_test: 'Tech Test', offer: 'Offer', rejected: 'Rejected', ghosted: 'Ghosted',

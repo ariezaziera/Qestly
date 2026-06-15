@@ -2,14 +2,14 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, BriefcaseBusiness, Kanban, User } from 'lucide-react'
+import { LayoutDashboard, BriefcaseBusiness, Kanban, Map } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const NAV = [
-  { href: '/dashboard',    icon: LayoutDashboard,  label: 'Dashboard'   },
+  { href: '/dashboard',    icon: LayoutDashboard,   label: 'Dashboard'    },
   { href: '/applications', icon: BriefcaseBusiness, label: 'Applications' },
-  { href: '/board',        icon: Kanban,      label: 'Board'       },
-  { href: '/profile',      icon: User,              label: 'Profile'     },
+  { href: '/board',        icon: Kanban,            label: 'Board'        },
+  { href: '/map',          icon: Map,               label: 'Map'          },
 ]
 
 export function MobileNav() {

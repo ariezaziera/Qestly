@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { applicationSchema, type ApplicationFormData } from '@/lib/validations/application'
@@ -34,11 +34,12 @@ const LEVEL_OPTIONS = [
 
 export default function NewApplicationPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { state: extractState, extract } = useExtractJD()
   const createApplication = useCreateApplication()
 
   const [mode, setMode] = useState<'url' | 'paste'>('url')
-  const [urlInput, setUrlInput] = useState('')
+  const [urlInput, setUrlInput] = useState(searchParams.get('prefill_url') ?? '')
   const [pasteInput, setPasteInput] = useState('')
   const [skills, setSkills] = useState<string[]>([])
   const [skillInput, setSkillInput] = useState('')
@@ -56,6 +57,10 @@ export default function NewApplicationPage() {
       status: 'applied',
       applied_date: new Date().toISOString().split('T')[0],
       required_skills: [],
+      position: searchParams.get('prefill_position') ?? '',
+      company: searchParams.get('prefill_company') ?? '',
+      location: searchParams.get('prefill_location') ?? '',
+      url: searchParams.get('prefill_url') ?? '',
     },
   })
 

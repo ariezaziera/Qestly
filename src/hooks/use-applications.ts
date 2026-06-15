@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { createClient } from '@/lib/supabase/client'
 import type { Application } from '@/types'
 import type { ApplicationFormData } from '@/lib/validations/application'
+import { geocodeLocation } from '@/lib/geocode'
 
 export function useApplications() {
   const supabase = createClient()
@@ -63,6 +64,9 @@ export function useCreateApplication() {
         match_score = Math.round((matches.length / required.length) * 100)
       }
 
+      // ── NEW: Geocode location ──
+      const geo = await geocodeLocation(payload.location ?? null)
+
       const { data, error } = await supabase
         .from('applications')
         .insert({
@@ -71,6 +75,9 @@ export function useCreateApplication() {
             match_score,
             applied_date: payload.applied_date || new Date().toISOString().split('T')[0],
             interview_date: payload.interview_date || null,  // ← add this
+            latitude: geo && !geo.isRemote ? geo.latitude : null,
+            longitude: geo && !geo.isRemote ? geo.longitude : null,
+            is_remote: geo?.isRemote ?? false,
         })
         .select()
         .single()
@@ -90,6 +97,13 @@ export function useUpdateApplication() {
 
   return useMutation({
     mutationFn: async ({ id, ...updates }: Partial<Application> & { id: string }) => {
+        if (updates.location !== undefined) {
+        const geo = await geocodeLocation(updates.location)
+            updates.latitude = geo && !geo.isRemote ? geo.latitude : null
+            updates.longitude = geo && !geo.isRemote ? geo.longitude : null
+            updates.is_remote = geo?.isRemote ?? false
+        }
+
       const { data, error } = await supabase
         .from('applications')
         .update(updates)

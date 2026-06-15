@@ -6,15 +6,17 @@ import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
 import {
   Radar, LayoutDashboard, BriefcaseBusiness,
-  Kanban, User, LogOut, Plus
+  Kanban, User, LogOut, Plus, Map, Compass
 } from 'lucide-react'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
 
 const NAV = [
-  { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+  { href: '/dashboard',    icon: LayoutDashboard,   label: 'Dashboard'    },
   { href: '/applications', icon: BriefcaseBusiness, label: 'Applications' },
-  { href: '/board', icon: Kanban, label: 'Board' },
-  { href: '/profile', icon: User, label: 'Profile' },
+  { href: '/board',        icon: Kanban,            label: 'Board'        },
+  { href: '/map',          icon: Map,               label: 'Map'          },
+  { href: '/discover',     icon: Compass,           label: 'Discover'     },
+  { href: '/profile',      icon: User,              label: 'Profile'      },
 ]
 
 export function Sidebar() {
