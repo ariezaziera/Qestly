@@ -3,34 +3,59 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useDiscoveredJobs, useRunDiscovery, useUpdateDiscoveredJob } from '@/hooks/use-discovered-jobs'
+import { useProfile } from '@/hooks/use-profile'
 import {
   Sparkles, Loader2, ExternalLink, X, Plus,
-  MapPin, DollarSign, AlertCircle, RadarIcon,
-  CheckCircle2, Compass
+  MapPin, DollarSign, AlertCircle, Compass,
+  Globe, Briefcase
 } from 'lucide-react'
+import { FaLinkedinIn } from 'react-icons/fa'
 import { cn } from '@/lib/utils'
 import type { DiscoveredJob } from '@/types'
 
 export default function DiscoverPage() {
   const { data: jobs = [], isLoading } = useDiscoveredJobs()
+  const { data: profile } = useProfile()
   const runDiscovery = useRunDiscovery()
   const [message, setMessage] = useState<string | null>(null)
+  const [remoteOnly, setRemoteOnly] = useState(false)
 
   async function handleDiscover() {
     setMessage(null)
     try {
-      const result = await runDiscovery.mutateAsync()
+      const result = await runDiscovery.mutateAsync({ remoteOnly })
       if (result.message) setMessage(result.message)
     } catch (err: any) {
       setMessage(err.message ?? 'Discovery failed.')
     }
   }
 
+  // Build pre-filled URLs for JobStreet and LinkedIn
+  const searchQuery = profile?.target_role ?? ''
+  const skills = profile?.skills?.slice(0, 3).join(' ') ?? ''
+  const combinedQuery = [searchQuery, skills].filter(Boolean).join(' ')
+
+  const jobStreetUrl = remoteOnly
+    ? `https://www.jobstreet.com.my/en/job-search/${encodeURIComponent(searchQuery)}-jobs/?workarrangement=3`
+    : `https://www.jobstreet.com.my/en/job-search/${encodeURIComponent(searchQuery)}-jobs/in-Malaysia/`
+
+  const linkedInUrl = remoteOnly
+    ? `https://www.linkedin.com/jobs/search/?keywords=${encodeURIComponent(combinedQuery)}&f_WT=2`
+    : `https://www.linkedin.com/jobs/search/?keywords=${encodeURIComponent(combinedQuery)}&location=Malaysia`
+
+  const indeedUrl = remoteOnly
+    ? `https://my.indeed.com/jobs?q=${encodeURIComponent(searchQuery)}&l=Remote`
+    : `https://my.indeed.com/jobs?q=${encodeURIComponent(searchQuery)}&l=Malaysia`
+
+  const filteredJobs = remoteOnly
+    ? jobs.filter(j => j.source === 'jooble_remote' || j.location?.toLowerCase().includes('remote'))
+    : jobs.filter(j => j.source === 'jooble' || !j.source?.includes('remote'))
+
   return (
     <div className="px-8 py-10 max-w-4xl mx-auto">
 
       {/* Header */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold mb-1 flex items-center gap-2">
             <Compass size={22} className="text-accent" />
@@ -40,6 +65,84 @@ export default function DiscoverPage() {
             Open positions matching your profile — not yet tracked.
           </p>
         </div>
+      </div>
+
+      {/* Remote toggle */}
+      <div className="flex items-center gap-3 mb-5 p-1 bg-card border border-border rounded-xl w-fit">
+        <button
+          onClick={() => setRemoteOnly(false)}
+          className={cn(
+            'flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors',
+            !remoteOnly
+              ? 'bg-primary text-white'
+              : 'text-muted hover:text-foreground'
+          )}
+        >
+          <MapPin size={14} />
+          Local / Malaysia
+        </button>
+        <button
+          onClick={() => setRemoteOnly(true)}
+          className={cn(
+            'flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors',
+            remoteOnly
+              ? 'bg-primary text-white'
+              : 'text-muted hover:text-foreground'
+          )}
+        >
+          <Globe size={14} />
+          Remote / Worldwide
+        </button>
+      </div>
+
+      {/* Find Jobs launcher */}
+      <div className="p-4 rounded-2xl bg-card border border-border mb-6">
+        <p className="text-xs text-muted font-medium uppercase tracking-wide mb-3">
+          Search directly on job platforms
+        </p>
+        <div className="flex flex-wrap gap-2">
+          <a
+            href={jobStreetUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#f97316]/10 border border-[#f97316]/25 text-[#f97316] hover:bg-[#f97316]/20 text-sm font-medium transition-colors"
+          >
+            <Briefcase size={14} />
+            Find on JobStreet
+          </a>
+          <a
+            href={linkedInUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#0077b5]/10 border border-[#0077b5]/25 text-[#0077b5] hover:bg-[#0077b5]/20 text-sm font-medium transition-colors"
+          >
+            <FaLinkedinIn size={14} />
+            Find on LinkedIn
+          </a>
+          <a
+            href={indeedUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#2164f3]/10 border border-[#2164f3]/25 text-[#2164f3] hover:bg-[#2164f3]/20 text-sm font-medium transition-colors"
+          >
+            <ExternalLink size={14} />
+            Find on Indeed
+          </a>
+        </div>
+        {!profile?.target_role && (
+          <p className="text-xs text-muted mt-2">
+            ⚠️ Set a target role in your{' '}
+            <Link href="/profile" className="underline text-primary">profile</Link>{' '}
+            to pre-fill these searches.
+          </p>
+        )}
+      </div>
+
+      {/* Scan button */}
+      <div className="flex items-center justify-between mb-6">
+        <p className="text-sm text-muted">
+          {remoteOnly ? 'Showing remote / worldwide results' : 'Showing Malaysia results'}
+        </p>
         <button
           onClick={handleDiscover}
           disabled={runDiscovery.isPending}
@@ -47,7 +150,7 @@ export default function DiscoverPage() {
         >
           {runDiscovery.isPending
             ? <><Loader2 size={16} className="animate-spin" /> Scanning…</>
-            : <><Sparkles size={16} /> Find new openings</>
+            : <><Sparkles size={16} /> Scan for openings</>
           }
         </button>
       </div>
@@ -60,16 +163,16 @@ export default function DiscoverPage() {
         </div>
       )}
 
-      {/* Loading */}
+      {/* Results */}
       {isLoading ? (
         <div className="flex items-center justify-center py-24">
           <Loader2 size={24} className="animate-spin text-primary" />
         </div>
-      ) : jobs.length === 0 ? (
-        <Empty onDiscover={handleDiscover} loading={runDiscovery.isPending} />
+      ) : filteredJobs.length === 0 ? (
+        <Empty onDiscover={handleDiscover} loading={runDiscovery.isPending} remoteOnly={remoteOnly} />
       ) : (
         <div className="space-y-3">
-          {jobs.map(job => (
+          {filteredJobs.map(job => (
             <JobCard key={job.id} job={job} />
           ))}
         </div>
@@ -94,10 +197,12 @@ function JobCard({ job }: { job: DiscoveredJob }) {
   }
 
   const salaryText = job.salary_min && job.salary_max
-    ? `RM ${Math.round(job.salary_min).toLocaleString()} – RM ${Math.round(job.salary_max).toLocaleString()}`
+    ? `${Math.round(job.salary_min).toLocaleString()} – ${Math.round(job.salary_max).toLocaleString()}`
     : job.salary_min
-      ? `From RM ${Math.round(job.salary_min).toLocaleString()}`
+      ? `From ${Math.round(job.salary_min).toLocaleString()}`
       : null
+
+  const isRemote = job.source === 'jooble_remote' || job.location?.toLowerCase().includes('remote')
 
   return (
     <div
@@ -108,11 +213,17 @@ function JobCard({ job }: { job: DiscoveredJob }) {
     >
       <div className="flex items-start justify-between gap-4 mb-3">
         <div className="min-w-0 flex-1">
-          <h3 className="font-semibold text-base mb-1 truncate">{job.title}</h3>
+          <div className="flex items-center gap-2 mb-1">
+            <h3 className="font-semibold text-base truncate">{job.title}</h3>
+            {isRemote && (
+              <span className="shrink-0 px-2 py-0.5 rounded-md bg-emerald-500/10 border border-emerald-500/25 text-emerald-500 text-xs font-medium flex items-center gap-1">
+                <Globe size={10} /> Remote
+              </span>
+            )}
+          </div>
           <p className="text-sm text-muted">{job.company}</p>
         </div>
 
-        {/* Fit score */}
         {job.fit_score !== null && (
           <div
             className="flex flex-col items-center px-3 py-1.5 rounded-xl shrink-0"
@@ -126,7 +237,6 @@ function JobCard({ job }: { job: DiscoveredJob }) {
         )}
       </div>
 
-      {/* Meta */}
       <div className="flex flex-wrap gap-3 text-xs text-muted mb-3">
         {job.location && (
           <span className="flex items-center gap-1">
@@ -140,14 +250,12 @@ function JobCard({ job }: { job: DiscoveredJob }) {
         )}
       </div>
 
-      {/* Fit reasoning */}
       {job.fit_reasoning && (
         <p className="text-xs text-muted/80 leading-relaxed mb-3 italic">
           "{job.fit_reasoning}"
         </p>
       )}
 
-      {/* Matched skills */}
       {job.matched_skills?.length > 0 && (
         <div className="flex flex-wrap gap-1.5 mb-4">
           {job.matched_skills.map(skill => (
@@ -161,7 +269,6 @@ function JobCard({ job }: { job: DiscoveredJob }) {
         </div>
       )}
 
-      {/* Actions */}
       <div className="flex items-center gap-2 pt-3 border-t border-border/50">
         <a
           href={job.apply_url}
@@ -199,15 +306,18 @@ function JobCard({ job }: { job: DiscoveredJob }) {
   )
 }
 
-function Empty({ onDiscover, loading }: { onDiscover: () => void; loading: boolean }) {
+function Empty({ onDiscover, loading, remoteOnly }: { onDiscover: () => void; loading: boolean; remoteOnly: boolean }) {
   return (
     <div className="flex flex-col items-center justify-center py-24 text-center">
       <div className="w-16 h-16 rounded-2xl bg-card border border-border flex items-center justify-center mb-5">
-        <Compass size={28} className="text-muted" />
+        {remoteOnly ? <Globe size={28} className="text-muted" /> : <Compass size={28} className="text-muted" />}
       </div>
       <h3 className="font-semibold text-lg mb-2">No suggestions yet</h3>
       <p className="text-sm text-muted max-w-xs mb-6">
-        Scan for open positions matching your target role and skills from your profile.
+        {remoteOnly
+          ? 'Scan for remote positions worldwide matching your target role and skills.'
+          : 'Scan for open positions in Malaysia matching your target role and skills.'
+        }
       </p>
       <button
         onClick={onDiscover}
@@ -216,7 +326,7 @@ function Empty({ onDiscover, loading }: { onDiscover: () => void; loading: boole
       >
         {loading
           ? <><Loader2 size={16} className="animate-spin" /> Scanning…</>
-          : <><Sparkles size={16} /> Find openings</>
+          : <><Sparkles size={16} /> {remoteOnly ? 'Find remote openings' : 'Find openings'}</>
         }
       </button>
     </div>

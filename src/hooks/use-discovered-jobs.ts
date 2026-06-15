@@ -17,8 +17,12 @@ export function useRunDiscovery() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async () => {
-      const res = await fetch('/api/discover-jobs', { method: 'POST' })
+    mutationFn: async ({ remoteOnly = false }: { remoteOnly?: boolean } = {}) => {
+      const res = await fetch('/api/discover-jobs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ remoteOnly }),
+      })
       const json = await res.json()
       if (!res.ok) throw new Error(json.error)
       return json
