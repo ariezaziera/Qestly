@@ -12,6 +12,10 @@ const config: Config = {
         accent: '#22D3EE',
         border: '#2A2A36',
         muted: '#6B7280',
+        // tailwind.config.ts — add inside theme.extend
+        padding: {
+        'safe-area-pb': 'env(safe-area-inset-bottom)',
+        },
       },
       fontFamily: {
         sans: ['Syne', 'sans-serif'],

@@ -25,10 +25,12 @@ export default function RegisterPage() {
   const router = useRouter()
   const [serverError, setServerError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
+  const [userName, setUserName] = useState('')
 
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<FormData>({ resolver: zodResolver(schema) })
 
@@ -37,21 +39,31 @@ export default function RegisterPage() {
     const supabase = createClient()
 
     const { error } = await supabase.auth.signUp({
-      email: data.email,
-      password: data.password,
-      options: {
+        email: data.email,
+        password: data.password,
+        options: {
         data: { full_name: data.full_name },
-        emailRedirectTo: `${location.origin}/api/auth/callback`,
-      },
+        },
     })
 
     if (error) {
-      setServerError(error.message)
-      return
+        setServerError(error.message)
+        return
     }
 
+    // Send welcome email via Resend
+    await fetch('/api/auth/send-welcome', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: data.email, name: data.full_name }),
+    })
+
+    // Sign out so user manually logs in
+    await supabase.auth.signOut()
+
+    setUserName(data.full_name)
     setSuccess(true)
-  }
+    }
 
   if (success) {
     return (
@@ -61,15 +73,15 @@ export default function RegisterPage() {
             <path d="M20 6L9 17l-5-5" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </div>
-        <h2 className="text-2xl font-bold mb-3">Check your inbox</h2>
+        <h2 className="text-2xl font-bold mb-3">Account created! 🎯</h2>
         <p className="text-muted text-sm leading-relaxed max-w-xs mx-auto">
-          We sent a confirmation link to your email. Click it to activate your account.
+          Welcome to JobRadar{userName ? `, ${userName}` : ''}. A welcome email is on its way. You can sign in now.
         </p>
         <Link
-          href="/auth/login"
-          className="inline-block mt-8 text-sm text-primary hover:text-primary/80 transition-colors"
+          href="/login"
+          className="inline-block mt-8 px-8 py-3 bg-primary hover:bg-primary/90 text-white font-semibold rounded-xl transition-all hover:shadow-[0_0_30px_rgba(99,102,241,0.3)]"
         >
-          Back to sign in
+          Sign in →
         </Link>
       </div>
     )

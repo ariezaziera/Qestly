@@ -45,3 +45,29 @@
     background: var(--muted);
   }
 }
+
+/* Add to globals.css */
+
+/* Smooth page transitions */
+@layer utilities {
+  .animate-in {
+    animation: fadeIn 0.2s ease-out;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0);   }
+}
+
+/* Date input dark mode fix */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.5);
+  cursor: pointer;
+}
+
+/* Select dark mode fix */
+select option {
+  background-color: #1A1A24;
+  color: #F1F1F5;
+}
