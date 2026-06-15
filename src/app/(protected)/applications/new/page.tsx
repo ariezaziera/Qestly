@@ -64,14 +64,11 @@ export default function NewApplicationPage() {
     },
   })
 
-  // ── Extract ──
   async function handleExtract() {
     const input = mode === 'url' ? urlInput.trim() : pasteInput.trim()
     if (!input) return
-
     const data = await extract(input, mode)
     if (!data) return
-
     if (mode === 'url') setValue('url', urlInput.trim())
     if (data.platform) setValue('platform', data.platform)
     if (data.company) setValue('company', data.company)
@@ -87,7 +84,6 @@ export default function NewApplicationPage() {
     setExtracted(true)
   }
 
-  // ── Skills ──
   function addSkill() {
     const s = skillInput.trim()
     if (!s || skills.includes(s)) return
@@ -103,7 +99,6 @@ export default function NewApplicationPage() {
     setValue('required_skills', updated)
   }
 
-  // ── Submit ──
   async function onSubmit(data: ApplicationFormData) {
     const app = await createApplication.mutateAsync({
       ...data,
@@ -115,18 +110,18 @@ export default function NewApplicationPage() {
   const canExtract = mode === 'url' ? !!urlInput.trim() : !!pasteInput.trim()
 
   return (
-    <div className="max-w-2xl mx-auto px-6 py-10">
+    <div className="max-w-2xl mx-auto px-4 py-6 sm:px-6 sm:py-10">
 
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold mb-1">New Application</h1>
+      <div className="mb-6 sm:mb-8">
+        <h1 className="text-xl sm:text-2xl font-bold mb-1">New Application</h1>
         <p className="text-sm text-muted">
           Paste a job URL or description to auto-fill, or fill in manually.
         </p>
       </div>
 
-      {/* ── AI Auto-fill ── */}
-      <div className="p-5 rounded-2xl bg-card border border-border mb-6">
+      {/* AI Auto-fill */}
+      <div className="p-4 sm:p-5 rounded-2xl bg-card border border-border mb-4 sm:mb-6">
         <div className="flex items-center gap-2 mb-4">
           <Sparkles size={16} className="text-accent" />
           <span className="text-sm font-medium">AI Auto-fill</span>
@@ -140,9 +135,7 @@ export default function NewApplicationPage() {
             onClick={() => setMode('url')}
             className={cn(
               'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors',
-              mode === 'url'
-                ? 'bg-primary text-white'
-                : 'text-muted hover:text-foreground'
+              mode === 'url' ? 'bg-primary text-white' : 'text-muted hover:text-foreground'
             )}
           >
             <Link2 size={12} />
@@ -153,9 +146,7 @@ export default function NewApplicationPage() {
             onClick={() => setMode('paste')}
             className={cn(
               'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors',
-              mode === 'paste'
-                ? 'bg-primary text-white'
-                : 'text-muted hover:text-foreground'
+              mode === 'paste' ? 'bg-primary text-white' : 'text-muted hover:text-foreground'
             )}
           >
             <ClipboardPaste size={12} />
@@ -165,7 +156,7 @@ export default function NewApplicationPage() {
 
         {/* URL input */}
         {mode === 'url' && (
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2">
             <div className="flex-1 flex items-center gap-2 px-4 py-2.5 rounded-xl bg-background border border-border focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/30 transition-colors">
               <Link2 size={15} className="text-muted shrink-0" />
               <input
@@ -173,14 +164,14 @@ export default function NewApplicationPage() {
                 onChange={e => setUrlInput(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && handleExtract()}
                 placeholder="https://jobstreet.com.my/job/..."
-                className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted focus:outline-none"
+                className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted focus:outline-none min-w-0"
               />
             </div>
             <button
               type="button"
               onClick={handleExtract}
               disabled={!canExtract || extractState.status === 'loading'}
-              className="px-4 py-2.5 bg-accent/15 hover:bg-accent/25 disabled:opacity-50 text-accent rounded-xl text-sm font-medium flex items-center gap-2 transition-colors whitespace-nowrap"
+              className="w-full sm:w-auto px-4 py-2.5 bg-accent/15 hover:bg-accent/25 disabled:opacity-50 text-accent rounded-xl text-sm font-medium flex items-center justify-center gap-2 transition-colors whitespace-nowrap"
             >
               {extractState.status === 'loading'
                 ? <><Loader2 size={15} className="animate-spin" /> Extracting…</>
@@ -217,12 +208,12 @@ export default function NewApplicationPage() {
         {extractState.status === 'error' && (
           <div className="flex gap-2 mt-3 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs">
             <AlertCircle size={14} className="shrink-0 mt-0.5" />
-            {extractState.message}
+            <span className="flex-1">{extractState.message}</span>
             {mode === 'url' && (
               <button
                 type="button"
                 onClick={() => setMode('paste')}
-                className="ml-auto underline underline-offset-2 whitespace-nowrap hover:text-red-300 transition-colors"
+                className="ml-auto underline underline-offset-2 whitespace-nowrap hover:text-red-300 transition-colors shrink-0"
               >
                 Try paste mode →
               </button>
@@ -238,14 +229,14 @@ export default function NewApplicationPage() {
         )}
       </div>
 
-      {/* ── Form ── */}
-      <div className="space-y-5">
+      {/* Form */}
+      <div className="space-y-4 sm:space-y-5">
 
         {/* Job details */}
-        <section className="p-6 rounded-2xl bg-card border border-border space-y-4">
-          <h2 className="text-sm font-semibold text-muted uppercase tracking-wider">Job details</h2>
+        <section className="p-4 sm:p-6 rounded-2xl bg-card border border-border space-y-4">
+          <h2 className="text-xs font-semibold text-muted uppercase tracking-wider">Job details</h2>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Input
               id="position"
               label="Position *"
@@ -262,7 +253,7 @@ export default function NewApplicationPage() {
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Input
               id="platform"
               label="Platform"
@@ -287,8 +278,8 @@ export default function NewApplicationPage() {
         </section>
 
         {/* Compensation + level */}
-        <section className="p-6 rounded-2xl bg-card border border-border space-y-4">
-          <h2 className="text-sm font-semibold text-muted uppercase tracking-wider">Compensation</h2>
+        <section className="p-4 sm:p-6 rounded-2xl bg-card border border-border space-y-4">
+          <h2 className="text-xs font-semibold text-muted uppercase tracking-wider">Compensation</h2>
 
           <Input
             id="salary_range"
@@ -303,7 +294,7 @@ export default function NewApplicationPage() {
               {LEVEL_OPTIONS.map(opt => (
                 <label
                   key={opt.value}
-                  className="flex items-center justify-center py-2.5 rounded-xl border border-border cursor-pointer text-sm has-checked:border-primary has-checked:bg-primary/10 has-checked:text-primary transition-colors"
+                  className="flex items-center justify-center py-2 sm:py-2.5 rounded-xl border border-border cursor-pointer text-xs sm:text-sm has-checked:border-primary has-checked:bg-primary/10 has-checked:text-primary transition-colors"
                 >
                   <input
                     type="radio"
@@ -319,8 +310,8 @@ export default function NewApplicationPage() {
         </section>
 
         {/* Required skills */}
-        <section className="p-6 rounded-2xl bg-card border border-border space-y-4">
-          <h2 className="text-sm font-semibold text-muted uppercase tracking-wider">Required skills</h2>
+        <section className="p-4 sm:p-6 rounded-2xl bg-card border border-border space-y-4">
+          <h2 className="text-xs font-semibold text-muted uppercase tracking-wider">Required skills</h2>
 
           <div className="flex gap-2">
             <input
@@ -328,12 +319,12 @@ export default function NewApplicationPage() {
               onChange={e => setSkillInput(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addSkill())}
               placeholder="e.g. React, TypeScript…"
-              className="flex-1 px-4 py-2.5 rounded-xl bg-background border border-border text-sm text-foreground placeholder:text-muted focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 transition-colors"
+              className="flex-1 min-w-0 px-4 py-2.5 rounded-xl bg-background border border-border text-sm text-foreground placeholder:text-muted focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 transition-colors"
             />
             <button
               type="button"
               onClick={addSkill}
-              className="px-4 py-2.5 bg-primary/15 hover:bg-primary/25 text-primary rounded-xl transition-colors"
+              className="shrink-0 px-4 py-2.5 bg-primary/15 hover:bg-primary/25 text-primary rounded-xl transition-colors"
             >
               <Plus size={18} />
             </button>
@@ -361,8 +352,8 @@ export default function NewApplicationPage() {
         </section>
 
         {/* Status + dates */}
-        <section className="p-6 rounded-2xl bg-card border border-border space-y-4">
-          <h2 className="text-sm font-semibold text-muted uppercase tracking-wider">Status & dates</h2>
+        <section className="p-4 sm:p-6 rounded-2xl bg-card border border-border space-y-4">
+          <h2 className="text-xs font-semibold text-muted uppercase tracking-wider">Status & dates</h2>
 
           <div className="space-y-1.5">
             <label className="text-sm font-medium text-foreground">Status</label>
@@ -385,7 +376,7 @@ export default function NewApplicationPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Input
               id="applied_date"
               type="date"
@@ -403,8 +394,8 @@ export default function NewApplicationPage() {
         </section>
 
         {/* Notes */}
-        <section className="p-6 rounded-2xl bg-card border border-border space-y-3">
-          <h2 className="text-sm font-semibold text-muted uppercase tracking-wider">Summary & notes</h2>
+        <section className="p-4 sm:p-6 rounded-2xl bg-card border border-border space-y-3">
+          <h2 className="text-xs font-semibold text-muted uppercase tracking-wider">Summary & notes</h2>
 
           <div className="space-y-1.5">
             <label className="text-sm font-medium text-foreground">AI Summary</label>

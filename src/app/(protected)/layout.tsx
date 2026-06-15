@@ -18,7 +18,7 @@ export default async function ProtectedLayout({
       <div className="hidden md:block">
         <Sidebar />
       </div>
-      <main className="flex-1 md:ml-60 min-h-screen pb-20 md:pb-0">
+      <main className="flex-1 min-w-0 overflow-x-hidden md:ml-60 min-h-screen pb-20 md:pb-0">
         {children}
       </main>
       <MobileNav />

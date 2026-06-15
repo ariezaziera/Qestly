@@ -7,12 +7,14 @@ const config: Config = {
     extend: {
       colors: {
         background: 'rgb(var(--color-background) / <alpha-value>)',
-        card: 'rgb(var(--color-card) / <alpha-value>)',
-        primary: 'rgb(var(--color-primary) / <alpha-value>)',
-        accent: 'rgb(var(--color-accent) / <alpha-value>)',
-        border: 'rgb(var(--color-border) / <alpha-value>)',
-        muted: 'rgb(var(--color-muted) / <alpha-value>)',
+        card:       'rgb(var(--color-card) / <alpha-value>)',
+        primary:    'rgb(var(--color-primary) / <alpha-value>)',
+        secondary:  'rgb(var(--color-secondary) / <alpha-value>)',  // ← add
+        accent:     'rgb(var(--color-accent) / <alpha-value>)',
+        border:     'rgb(var(--color-border) / <alpha-value>)',
+        muted:      'rgb(var(--color-muted) / <alpha-value>)',
         foreground: 'rgb(var(--color-foreground) / <alpha-value>)',
+        error:      'rgb(var(--color-error) / <alpha-value>)',      // ← add
       },
       fontFamily: {
         sans: ['Syne', 'sans-serif'],

@@ -10,7 +10,10 @@ import { QueryProvider } from '@/providers/query-provider'
 import { ThemeProvider } from '@/providers/theme-provider'
 
 export const viewport: Viewport = {
-  themeColor: '#6366F1',
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#F4C542' },
+    { media: '(prefers-color-scheme: dark)', color: '#F6D365' },
+  ],
   width: 'device-width',
   initialScale: 1,
   maximumScale: 1,
@@ -55,7 +58,7 @@ export default function RootLayout({
       <body>
         <ThemeProvider
           attribute="class"
-          defaultTheme="dark"
+          defaultTheme="light"
           enableSystem={false}
           disableTransitionOnChange
         >

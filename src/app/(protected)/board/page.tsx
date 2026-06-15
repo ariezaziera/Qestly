@@ -8,6 +8,7 @@ import {
   useSensor,
   useSensors,
   closestCorners,
+  useDroppable,
   type DragStartEvent,
   type DragEndEvent,
   type DragOverEvent,
@@ -17,23 +18,22 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
 import { useApplications, useUpdateApplication } from '@/hooks/use-applications'
-import { StatusBadge } from '@/components/ui/badge'
 import { SortableCard } from '@/components/board/sortable-card'
 import { ApplicationCard } from '@/components/board/application-card'
-import { Plus, Loader2, Kanban } from 'lucide-react'
+import { Plus, Loader2, Kanban, ChevronDown } from 'lucide-react'
 import Link from 'next/link'
 import type { Application, ApplicationStatus } from '@/types'
 import { STATUS_COLORS } from '@/lib/utils'
+import { cn } from '@/lib/utils'
 
-// ── Column config ──
 const COLUMNS: { id: ApplicationStatus; label: string }[] = [
-  { id: 'applied',    label: 'Applied'    },
-  { id: 'response',   label: 'Response'   },
-  { id: 'interview',  label: 'Interview'  },
-  { id: 'tech_test',  label: 'Tech Test'  },
-  { id: 'offer',      label: 'Offer'      },
-  { id: 'rejected',   label: 'Rejected'   },
-  { id: 'ghosted',    label: 'Ghosted'    },
+  { id: 'applied',   label: 'Applied'   },
+  { id: 'response',  label: 'Response'  },
+  { id: 'interview', label: 'Interview' },
+  { id: 'tech_test', label: 'Tech Test' },
+  { id: 'offer',     label: 'Offer'     },
+  { id: 'rejected',  label: 'Rejected'  },
+  { id: 'ghosted',   label: 'Ghosted'   },
 ]
 
 export default function BoardPage() {
@@ -42,14 +42,14 @@ export default function BoardPage() {
 
   const [activeId, setActiveId] = useState<string | null>(null)
   const [localApps, setLocalApps] = useState<Application[] | null>(null)
+  const [openCols, setOpenCols] = useState<Set<string>>(
+    new Set(['applied', 'response', 'interview'])
+  )
 
-  // Use local optimistic state while dragging, otherwise use server data
   const apps = localApps ?? applications
 
   const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: { distance: 6 },
-    })
+    useSensor(PointerSensor, { activationConstraint: { distance: 6 } })
   )
 
   const activeApp = activeId ? apps.find(a => a.id === activeId) : null
@@ -62,7 +62,19 @@ export default function BoardPage() {
     [apps]
   )
 
-  // ── Drag handlers ──
+  function toggleCol(id: string) {
+    setOpenCols(prev => {
+      const next = new Set(prev)
+      next.has(id) ? next.delete(id) : next.add(id)
+      return next
+    })
+  }
+
+  // Mobile move handler
+  async function handleMoveTo(appId: string, status: ApplicationStatus) {
+    await updateApp.mutateAsync({ id: appId, status })
+  }
+
   function onDragStart(event: DragStartEvent) {
     setActiveId(event.active.id as string)
     setLocalApps([...applications])
@@ -71,53 +83,33 @@ export default function BoardPage() {
   function onDragOver(event: DragOverEvent) {
     const { active, over } = event
     if (!over || !localApps) return
-
     const activeApp = localApps.find(a => a.id === active.id)
     if (!activeApp) return
-
-    // Dragging over a column id directly
     const overIsColumn = COLUMNS.some(c => c.id === over.id)
     const newStatus = overIsColumn
       ? (over.id as ApplicationStatus)
       : localApps.find(a => a.id === over.id)?.status
-
     if (!newStatus || activeApp.status === newStatus) return
-
     setLocalApps(prev =>
-      prev!.map(a =>
-        a.id === active.id ? { ...a, status: newStatus } : a
-      )
+      prev!.map(a => a.id === active.id ? { ...a, status: newStatus } : a)
     )
   }
 
   async function onDragEnd(event: DragEndEvent) {
     const { active, over } = event
     setActiveId(null)
-
-    if (!over || !localApps) {
-      setLocalApps(null)
-      return
-    }
-
+    if (!over || !localApps) { setLocalApps(null); return }
     const app = localApps.find(a => a.id === active.id)
     const original = applications.find(a => a.id === active.id)
-
-    if (!app || !original) {
-      setLocalApps(null)
-      return
-    }
-
-    // Only save if status actually changed
+    if (!app || !original) { setLocalApps(null); return }
     if (app.status !== original.status) {
       try {
         await updateApp.mutateAsync({ id: app.id, status: app.status })
       } catch {
-        // Revert on error
         setLocalApps(null)
         return
       }
     }
-
     setLocalApps(null)
   }
 
@@ -130,26 +122,29 @@ export default function BoardPage() {
   }
 
   return (
-    <div className="px-8 py-10 h-screen flex flex-col">
+    <div className="px-4 py-6 sm:px-8 sm:py-10 flex flex-col h-screen">
 
       {/* Header */}
-      <div className="flex items-center justify-between mb-8 shrink-0">
+      <div className="flex flex-wrap items-start justify-between gap-3 mb-6 sm:mb-8 shrink-0">
         <div>
-          <h1 className="text-2xl font-bold mb-1">Board</h1>
-          <p className="text-sm text-muted">
+          <h1 className="text-xl sm:text-2xl font-bold mb-1">Board</h1>
+          <p className="text-sm text-muted hidden sm:block">
             Drag applications between stages to update their status.
+          </p>
+          <p className="text-sm text-muted sm:hidden">
+            Tap "Move" on a card to change its stage.
           </p>
         </div>
         <Link
           href="/applications/new"
-          className="flex items-center gap-2 px-4 py-2.5 bg-primary hover:bg-primary/90 text-white text-sm font-medium rounded-xl transition-colors"
+          className="flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2.5 bg-primary hover:bg-primary/90 text-white text-sm font-medium rounded-xl transition-colors whitespace-nowrap"
         >
           <Plus size={16} />
-          New Application
+          <span className="hidden sm:inline">New Application</span>
+          <span className="sm:hidden">New</span>
         </Link>
       </div>
 
-      {/* Board */}
       {applications.length === 0 ? (
         <EmptyBoard />
       ) : (
@@ -160,17 +155,72 @@ export default function BoardPage() {
           onDragOver={onDragOver}
           onDragEnd={onDragEnd}
         >
-          <div className="flex gap-4 overflow-x-auto pb-4 flex-1 items-start">
+          {/* Desktop — horizontal scroll */}
+          <div className="hidden sm:flex gap-4 overflow-x-auto pb-4 flex-1 items-start">
             {columns.map(col => (
-              <Column key={col.id} column={col} isActive={activeId !== null} />
+              <DesktopColumn key={col.id} column={col} isActive={activeId !== null} />
             ))}
           </div>
 
-          {/* Drag overlay — floating card while dragging */}
-          <DragOverlay>
+          {/* Mobile — vertical accordion */}
+          <div className="sm:hidden flex-1 overflow-y-auto space-y-2 pb-4">
+            {columns.map(col => {
+              const color = STATUS_COLORS[col.id]
+              const isOpen = openCols.has(col.id)
+              return (
+                <div
+                  key={col.id}
+                  className="rounded-2xl bg-card border border-border overflow-hidden"
+                >
+                  <button
+                    type="button"
+                    onClick={() => toggleCol(col.id)}
+                    className="w-full flex items-center justify-between px-4 py-3"
+                  >
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: color }} />
+                      <span className="text-sm font-semibold">{col.label}</span>
+                      <span
+                        className="text-xs font-mono px-2 py-0.5 rounded-md"
+                        style={{ color, backgroundColor: `${color}18`, border: `1px solid ${color}30` }}
+                      >
+                        {col.items.length}
+                      </span>
+                    </div>
+                    <ChevronDown
+                      size={16}
+                      className={cn('text-muted transition-transform', isOpen && 'rotate-180')}
+                    />
+                  </button>
+
+                  {isOpen && (
+                    <div className="border-t border-border p-3 space-y-2.5">
+                      {col.items.length === 0 ? (
+                        <p className="text-xs text-muted text-center py-4">No applications here.</p>
+                      ) : (
+                        col.items.map(app => (
+                          <ApplicationCard
+                            key={app.id}
+                            app={app}
+                            onMoveTo={(status) => handleMoveTo(app.id, status)}
+                          />
+                        ))
+                      )}
+                    </div>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+
+          {/* Fix: overlay is purely visual, pointer-events-none prevents blocking drops */}
+          <DragOverlay dropAnimation={null}>
             {activeApp && (
-              <div className="rotate-2 opacity-95 pointer-events-none">
-                <ApplicationCard app={activeApp} />
+              <div
+                className="rotate-2 opacity-90"
+                style={{ pointerEvents: 'none' }}
+              >
+                <ApplicationCard app={activeApp} isDragging />
               </div>
             )}
           </DragOverlay>
@@ -180,8 +230,8 @@ export default function BoardPage() {
   )
 }
 
-// ── Column ──
-function Column({
+// ── Desktop column ──
+function DesktopColumn({
   column,
   isActive,
 }: {
@@ -196,28 +246,18 @@ function Column({
       className="shrink-0 w-72 flex flex-col rounded-2xl bg-card border border-border overflow-hidden"
       style={{ minHeight: '200px' }}
     >
-      {/* Column header */}
       <div className="px-4 py-3 border-b border-border flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <div
-            className="w-2 h-2 rounded-full shrink-0"
-            style={{ backgroundColor: color }}
-          />
+          <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: color }} />
           <span className="text-sm font-semibold">{column.label}</span>
         </div>
         <span
           className="text-xs font-mono px-2 py-0.5 rounded-md"
-          style={{
-            color,
-            backgroundColor: `${color}18`,
-            border: `1px solid ${color}30`,
-          }}
+          style={{ color, backgroundColor: `${color}18`, border: `1px solid ${color}30` }}
         >
           {column.items.length}
         </span>
       </div>
-
-      {/* Droppable area */}
       <SortableContext items={ids} strategy={verticalListSortingStrategy}>
         <DroppableColumn id={column.id} isEmpty={column.items.length === 0} isActive={isActive}>
           <div className="p-3 space-y-2.5 flex-1">
@@ -232,8 +272,6 @@ function Column({
 }
 
 // ── Droppable zone ──
-import { useDroppable } from '@dnd-kit/core'
-
 function DroppableColumn({
   id, children, isEmpty, isActive,
 }: {
@@ -243,20 +281,18 @@ function DroppableColumn({
   isActive: boolean
 }) {
   const { setNodeRef, isOver } = useDroppable({ id })
-
   return (
     <div
       ref={setNodeRef}
       className={cn(
-        'flex-1 min-h-30 transition-colors rounded-b-2xl',
+        'flex-1 transition-colors rounded-b-2xl',
         isOver && 'bg-primary/5',
         isEmpty && isActive && 'border-2 border-dashed border-primary/20'
       )}
+      style={{ minHeight: '80px' }}
     >
       {isEmpty && isActive ? (
-        <div className="flex items-center justify-center h-24 text-xs text-muted">
-          Drop here
-        </div>
+        <div className="flex items-center justify-center h-24 text-xs text-muted">Drop here</div>
       ) : children}
     </div>
   )
@@ -265,11 +301,11 @@ function DroppableColumn({
 // ── Empty board ──
 function EmptyBoard() {
   return (
-    <div className="flex flex-col items-center justify-center flex-1 text-center">
-      <div className="w-16 h-16 rounded-2xl bg-card border border-border flex items-center justify-center mb-5">
-        <Kanban size={28} className="text-muted" />
+    <div className="flex flex-col items-center justify-center flex-1 text-center px-4">
+      <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-card border border-border flex items-center justify-center mb-5">
+        <Kanban size={26} className="text-muted" />
       </div>
-      <h3 className="font-semibold text-lg mb-2">No applications yet</h3>
+      <h3 className="font-semibold text-base sm:text-lg mb-2">No applications yet</h3>
       <p className="text-sm text-muted max-w-xs mb-6">
         Add your first application and it will appear here on the board.
       </p>
@@ -283,5 +319,3 @@ function EmptyBoard() {
     </div>
   )
 }
-
-import { cn } from '@/lib/utils'

@@ -13,7 +13,6 @@ import { cn } from '@/lib/utils'
 import type { Application } from '@/types'
 import { ExportButton } from '@/components/applications/export-button'
 
-// ── Types ──
 type SortField = 'company' | 'position' | 'status' | 'match_score' | 'applied_date'
 type SortDir = 'asc' | 'desc'
 
@@ -33,7 +32,6 @@ const STATUS_LABELS: Record<string, string> = {
   ghosted: 'Ghosted',
 }
 
-// ── Page ──
 export default function ApplicationsPage() {
   const { data: applications = [], isLoading } = useApplications()
   const deleteApp = useDeleteApplication()
@@ -45,7 +43,6 @@ export default function ApplicationsPage() {
   const [sortDir, setSortDir] = useState<SortDir>('desc')
   const [deletingId, setDeletingId] = useState<string | null>(null)
 
-  // ── Filter + sort ──
   const filtered = useMemo(() => {
     let list = [...applications]
 
@@ -59,24 +56,16 @@ export default function ApplicationsPage() {
       )
     }
 
-    if (statusFilter !== 'all') {
-      list = list.filter(a => a.status === statusFilter)
-    }
-
-    if (levelFilter !== 'all') {
-      list = list.filter(a => a.experience_level === levelFilter)
-    }
+    if (statusFilter !== 'all') list = list.filter(a => a.status === statusFilter)
+    if (levelFilter !== 'all') list = list.filter(a => a.experience_level === levelFilter)
 
     list.sort((a, b) => {
       let aVal: string | number | null = a[sortField] ?? null
       let bVal: string | number | null = b[sortField] ?? null
-
       if (aVal === null) return 1
       if (bVal === null) return -1
-
       if (typeof aVal === 'string') aVal = aVal.toLowerCase()
       if (typeof bVal === 'string') bVal = bVal.toLowerCase()
-
       if (aVal < bVal) return sortDir === 'asc' ? -1 : 1
       if (aVal > bVal) return sortDir === 'asc' ? 1 : -1
       return 0
@@ -101,7 +90,6 @@ export default function ApplicationsPage() {
     setDeletingId(null)
   }
 
-  // ── Stats strip ──
   const stats = useMemo(() => ({
     total: applications.length,
     interview: applications.filter(a => a.status === 'interview').length,
@@ -117,40 +105,38 @@ export default function ApplicationsPage() {
   }), [applications])
 
   return (
-    <div className="px-8 py-10">
+    <div className="px-4 py-6 sm:px-8 sm:py-10">
 
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-            <div>
-                <h1 className="text-2xl font-bold mb-1">Applications</h1>
-                <p className="text-sm text-muted">{applications.length} total tracked</p>
-            </div>
-            <div className="flex items-center gap-3">
-                <ExportButton
-                applications={filtered}
-                profileName={null}
-                />
-                <Link
-                href="/applications/new"
-                className="flex items-center gap-2 px-4 py-2.5 bg-primary hover:bg-primary/90 text-white text-sm font-medium rounded-xl transition-colors"
-                >
-                <Plus size={16} />
-                New Application
-                </Link>
-            </div>
+      {/* Header */}
+      <div className="flex flex-wrap items-start justify-between gap-3 mb-6 sm:mb-8">
+        <div>
+          <h1 className="text-xl sm:text-2xl font-bold mb-1">Applications</h1>
+          <p className="text-sm text-muted">{applications.length} total tracked</p>
         </div>
+        <div className="flex items-center gap-2 sm:gap-3">
+          <ExportButton applications={filtered} profileName={null} />
+          <Link
+            href="/applications/new"
+            className="flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2.5 bg-primary hover:bg-primary/90 text-white text-sm font-medium rounded-xl transition-colors whitespace-nowrap"
+          >
+            <Plus size={16} />
+            <span className="hidden sm:inline">New Application</span>
+            <span className="sm:hidden">New</span>
+          </Link>
+        </div>
+      </div>
 
       {/* Stats strip */}
-      <div className="grid grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-5 sm:mb-6">
         {[
           { label: 'Total', value: stats.total, mono: false },
           { label: 'Interviews', value: stats.interview, mono: false },
           { label: 'Offers', value: stats.offer, mono: false },
           { label: 'Avg Match', value: stats.avgScore !== null ? `${stats.avgScore}%` : '—', mono: true },
         ].map(s => (
-          <div key={s.label} className="p-4 rounded-2xl bg-card border border-border">
+          <div key={s.label} className="p-3 sm:p-4 rounded-2xl bg-card border border-border">
             <p className="text-xs text-muted mb-1">{s.label}</p>
-            <p className={cn('text-2xl font-bold', s.mono && 'font-mono')}>
+            <p className={cn('text-xl sm:text-2xl font-bold', s.mono && 'font-mono')}>
               {s.value}
             </p>
           </div>
@@ -158,16 +144,16 @@ export default function ApplicationsPage() {
       </div>
 
       {/* Filters */}
-      <div className="flex flex-col md:flex-row gap-3 mb-5">
+      <div className="flex flex-col gap-2 mb-5">
 
         {/* Search */}
-        <div className="flex items-center gap-2 flex-1 px-4 py-2.5 rounded-xl bg-card border border-border focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/30 transition-colors">
+        <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-card border border-border focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/30 transition-colors">
           <Search size={15} className="text-muted shrink-0" />
           <input
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Search company, role, location…"
-            className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted focus:outline-none"
+            className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted focus:outline-none min-w-0"
           />
           {search && (
             <button onClick={() => setSearch('')} className="text-muted hover:text-foreground transition-colors">
@@ -176,30 +162,31 @@ export default function ApplicationsPage() {
           )}
         </div>
 
-        {/* Status filter */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0">
-          <SlidersHorizontal size={15} className="text-muted shrink-0" />
-          {STATUS_OPTIONS.map(s => (
-            <button
-              key={s}
-              onClick={() => setStatusFilter(s)}
-              className={cn(
-                'px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-colors',
-                statusFilter === s
-                  ? 'bg-primary text-white'
-                  : 'bg-card border border-border text-muted hover:text-foreground'
-              )}
-            >
-              {STATUS_LABELS[s]}
-            </button>
-          ))}
+        {/* Status pills + level select */}
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 overflow-x-auto flex-1 scrollbar-hide">
+            {STATUS_OPTIONS.map(s => (
+              <button
+                key={s}
+                onClick={() => setStatusFilter(s)}
+                className={cn(
+                  'px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-colors shrink-0',
+                  statusFilter === s
+                    ? 'bg-primary text-white'
+                    : 'bg-card border border-border text-muted hover:text-foreground'
+                )}
+              >
+                {STATUS_LABELS[s]}
+              </button>
+            ))}
+          </div>
         </div>
 
-        {/* Level filter */}
+        {/* Level filter — full width on mobile */}
         <select
           value={levelFilter}
           onChange={e => setLevelFilter(e.target.value)}
-          className="px-3 py-2.5 rounded-xl bg-card border border-border text-sm text-muted focus:outline-none focus:border-primary transition-colors"
+          className="w-full sm:w-auto px-3 py-2.5 rounded-xl bg-card border border-border text-sm text-muted focus:outline-none focus:border-primary transition-colors"
         >
           <option value="all">All levels</option>
           <option value="junior">Junior</option>
@@ -209,7 +196,7 @@ export default function ApplicationsPage() {
         </select>
       </div>
 
-      {/* Table */}
+      {/* Content */}
       {isLoading ? (
         <div className="flex items-center justify-center py-24">
           <Loader2 size={24} className="animate-spin text-primary" />
@@ -217,48 +204,62 @@ export default function ApplicationsPage() {
       ) : filtered.length === 0 ? (
         <Empty hasApps={applications.length > 0} />
       ) : (
-        <div className="rounded-2xl border border-border overflow-hidden">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-border bg-card/50">
-                {[
-                  { label: 'Company', field: 'company' as SortField },
-                  { label: 'Position', field: 'position' as SortField },
-                  { label: 'Status', field: 'status' as SortField },
-                  { label: 'Match', field: 'match_score' as SortField },
-                  { label: 'Applied', field: 'applied_date' as SortField },
-                ].map(col => (
-                  <th
-                    key={col.field}
-                    onClick={() => toggleSort(col.field)}
-                    className="text-left px-5 py-3.5 text-xs font-medium text-muted uppercase tracking-wider cursor-pointer hover:text-foreground transition-colors select-none"
-                  >
-                    <div className="flex items-center gap-1.5">
-                      {col.label}
-                      <SortIcon field={col.field} current={sortField} dir={sortDir} />
-                    </div>
+        <>
+          {/* Mobile card list */}
+          <div className="sm:hidden space-y-2">
+            {filtered.map(app => (
+              <MobileCard
+                key={app.id}
+                app={app}
+                onDelete={() => handleDelete(app.id)}
+                isDeleting={deletingId === app.id}
+              />
+            ))}
+          </div>
+
+          {/* Desktop table */}
+          <div className="hidden sm:block rounded-2xl border border-border overflow-hidden">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-border bg-card/50">
+                  {[
+                    { label: 'Company', field: 'company' as SortField },
+                    { label: 'Position', field: 'position' as SortField },
+                    { label: 'Status', field: 'status' as SortField },
+                    { label: 'Match', field: 'match_score' as SortField },
+                    { label: 'Applied', field: 'applied_date' as SortField },
+                  ].map(col => (
+                    <th
+                      key={col.field}
+                      onClick={() => toggleSort(col.field)}
+                      className="text-left px-5 py-3.5 text-xs font-medium text-muted uppercase tracking-wider cursor-pointer hover:text-foreground transition-colors select-none"
+                    >
+                      <div className="flex items-center gap-1.5">
+                        {col.label}
+                        <SortIcon field={col.field} current={sortField} dir={sortDir} />
+                      </div>
+                    </th>
+                  ))}
+                  <th className="px-5 py-3.5 text-xs font-medium text-muted uppercase tracking-wider text-right">
+                    Actions
                   </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {filtered.map(app => (
+                  <DesktopRow
+                    key={app.id}
+                    app={app}
+                    onDelete={() => handleDelete(app.id)}
+                    isDeleting={deletingId === app.id}
+                  />
                 ))}
-                <th className="px-5 py-3.5 text-xs font-medium text-muted uppercase tracking-wider text-right">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {filtered.map(app => (
-                <Row
-                  key={app.id}
-                  app={app}
-                  onDelete={() => handleDelete(app.id)}
-                  isDeleting={deletingId === app.id}
-                />
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </tbody>
+            </table>
+          </div>
+        </>
       )}
 
-      {/* Result count */}
       {filtered.length > 0 && (
         <p className="text-xs text-muted text-center mt-4">
           Showing {filtered.length} of {applications.length} applications
@@ -268,8 +269,77 @@ export default function ApplicationsPage() {
   )
 }
 
-// ── Row ──
-function Row({
+// ── Mobile card ──
+function MobileCard({
+  app,
+  onDelete,
+  isDeleting,
+}: {
+  app: Application
+  onDelete: () => void
+  isDeleting: boolean
+}) {
+  return (
+    <div className="p-4 rounded-2xl bg-card border border-border">
+      <div className="flex items-start justify-between gap-2 mb-2">
+        <div className="min-w-0 flex-1">
+          <p className="font-semibold text-sm truncate">{app.company}</p>
+          <p className="text-xs text-muted truncate mt-0.5">{app.position}</p>
+        </div>
+        <MatchScoreBadge score={app.match_score} />
+      </div>
+
+      <div className="flex items-center gap-2 flex-wrap mb-3">
+        <StatusBadge status={app.status} />
+        {app.location && (
+          <span className="text-xs text-muted">{app.location}</span>
+        )}
+        {app.platform && (
+          <span className="text-xs text-muted">· {app.platform}</span>
+        )}
+      </div>
+
+      <div className="flex items-center justify-between">
+        <span className="text-xs text-muted font-mono">
+          {new Date(app.applied_date).toLocaleDateString('en-MY', {
+            day: 'numeric', month: 'short', year: 'numeric'
+          })}
+        </span>
+        <div className="flex items-center gap-1.5">
+          {app.url && (
+            <a
+              href={app.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-1.5 rounded-lg hover:bg-white/10 text-muted hover:text-foreground transition-colors"
+            >
+              <ExternalLink size={14} />
+            </a>
+          )}
+          <Link
+            href={`/applications/${app.id}`}
+            className="px-3 py-1.5 rounded-lg bg-primary/15 hover:bg-primary/25 text-primary text-xs font-medium transition-colors"
+          >
+            View
+          </Link>
+          <button
+            onClick={onDelete}
+            disabled={isDeleting}
+            className="p-1.5 rounded-lg hover:bg-red-500/15 text-muted hover:text-red-400 transition-colors disabled:opacity-50"
+          >
+            {isDeleting
+              ? <Loader2 size={14} className="animate-spin" />
+              : <Trash2 size={14} />
+            }
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ── Desktop row ──
+function DesktopRow({
   app,
   onDelete,
   isDeleting,
@@ -282,15 +352,11 @@ function Row({
     <tr className="group hover:bg-card/40 transition-colors">
       <td className="px-5 py-4">
         <div className="font-medium text-sm">{app.company}</div>
-        {app.location && (
-          <div className="text-xs text-muted mt-0.5">{app.location}</div>
-        )}
+        {app.location && <div className="text-xs text-muted mt-0.5">{app.location}</div>}
       </td>
       <td className="px-5 py-4">
         <div className="text-sm">{app.position}</div>
-        {app.platform && (
-          <div className="text-xs text-muted mt-0.5">{app.platform}</div>
-        )}
+        {app.platform && <div className="text-xs text-muted mt-0.5">{app.platform}</div>}
       </td>
       <td className="px-5 py-4">
         <StatusBadge status={app.status} />
@@ -340,13 +406,7 @@ function Row({
 }
 
 // ── Sort icon ──
-function SortIcon({
-  field, current, dir
-}: {
-  field: SortField
-  current: SortField
-  dir: SortDir
-}) {
+function SortIcon({ field, current, dir }: { field: SortField; current: SortField; dir: SortDir }) {
   if (field !== current) return <ChevronsUpDown size={12} className="opacity-30" />
   return dir === 'asc'
     ? <ChevronUp size={12} className="text-primary" />
@@ -356,11 +416,11 @@ function SortIcon({
 // ── Empty state ──
 function Empty({ hasApps }: { hasApps: boolean }) {
   return (
-    <div className="flex flex-col items-center justify-center py-24 text-center">
-      <div className="w-16 h-16 rounded-2xl bg-card border border-border flex items-center justify-center mb-5">
-        <BriefcaseBusiness size={28} className="text-muted" />
+    <div className="flex flex-col items-center justify-center py-20 sm:py-24 text-center">
+      <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-card border border-border flex items-center justify-center mb-5">
+        <BriefcaseBusiness size={26} className="text-muted" />
       </div>
-      <h3 className="font-semibold text-lg mb-2">
+      <h3 className="font-semibold text-base sm:text-lg mb-2">
         {hasApps ? 'No results found' : 'No applications yet'}
       </h3>
       <p className="text-sm text-muted max-w-xs mb-6">

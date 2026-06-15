@@ -1,33 +1,43 @@
 @import "tailwindcss";
 
+@theme {
+  --color-background: rgb(var(--jr-background));
+  --color-card:       rgb(var(--jr-card));
+  --color-primary:    rgb(var(--jr-primary));
+  --color-secondary:  rgb(var(--jr-secondary));
+  --color-accent:     rgb(var(--jr-accent));
+  --color-foreground: rgb(var(--jr-foreground));
+  --color-muted:      rgb(var(--jr-muted));
+  --color-border:     rgb(var(--jr-border));
+  --color-error:      rgb(var(--jr-error));
+}
+
 @layer base {
-  /* Dark theme (default) */
-  :root,
-  .dark {
-    --color-background: 15 15 19;
-    --color-card:       26 26 36;
-    --color-primary:    99 102 241;
-    --color-accent:     34 211 238;
-    --color-foreground: 241 241 245;
-    --color-muted:      107 114 128;
-    --color-border:     42 42 54;
+  :root, .dark {
+    --jr-background: 15 23 42;
+    --jr-card:       30 41 59;
+    --jr-primary:    246 211 101;
+    --jr-secondary:  96 165 250;
+    --jr-accent:     134 239 172;
+    --jr-foreground: 248 250 252;
+    --jr-muted:      148 163 184;
+    --jr-border:     51 65 85;
+    --jr-error:      248 113 113;
   }
-
-  /* Light theme */
   .light {
-    --color-background: 250 250 252;
-    --color-card:       255 255 255;
-    --color-primary:    99 102 241;
-    --color-accent:     8 145 178;
-    --color-foreground: 17 17 24;
-    --color-muted:      107 114 128;
-    --color-border:     228 228 234;
+    --jr-background: 250 248 242;
+    --jr-card:       255 255 255;
+    --jr-primary:    244 197 66;
+    --jr-secondary:  30 58 95;
+    --jr-accent:     107 163 104;
+    --jr-foreground: 45 45 45;
+    --jr-muted:      107 114 128;
+    --jr-border:     229 231 235;
+    --jr-error:      231 111 81;
   }
-
   * {
     border-color: rgb(var(--color-border));
   }
-
   body {
     background-color: rgb(var(--color-background));
     color: rgb(var(--color-foreground));
@@ -35,57 +45,46 @@
     -webkit-font-smoothing: antialiased;
     transition: background-color 0.2s ease, color 0.2s ease;
   }
-
   .font-mono {
     font-family: 'JetBrains Mono', monospace;
   }
-
   ::selection {
     background: rgb(var(--color-primary) / 0.2);
     color: rgb(var(--color-foreground));
   }
-
   ::-webkit-scrollbar { width: 6px; }
   ::-webkit-scrollbar-track { background: rgb(var(--color-background)); }
   ::-webkit-scrollbar-thumb { background: rgb(var(--color-border)); border-radius: 3px; }
   ::-webkit-scrollbar-thumb:hover { background: rgb(var(--color-muted)); }
 }
-
 @layer utilities {
   .animate-in {
     animation: fadeIn 0.2s ease-out;
   }
 }
-
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(6px); }
   to   { opacity: 1; transform: translateY(0); }
 }
-
 input[type="date"]::-webkit-calendar-picker-indicator {
   filter: invert(0.5);
   cursor: pointer;
 }
-
 .light input[type="date"]::-webkit-calendar-picker-indicator {
   filter: invert(0.3);
 }
-
 select option {
   background-color: rgb(var(--color-card));
   color: rgb(var(--color-foreground));
 }
-
 /* Dim decorative glows in light mode */
 .light .glow-blob {
   opacity: 0.4;
 }
-
 @keyframes radar-sweep {
   from { transform: rotate(0deg); }
   to   { transform: rotate(360deg); }
 }
-
 .animate-radar-sweep {
   animation: radar-sweep 4s linear infinite;
 }

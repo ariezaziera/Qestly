@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
+import dynamic from 'next/dynamic'
 import {
   AreaChart, Area, BarChart, Bar,
   PieChart, Pie, Cell,
@@ -17,7 +18,16 @@ import {
 import type { Application, Profile } from '@/types'
 import { ExportButton } from '@/components/applications/export-button'
 import { RadarWidget } from './radar-widget'
-import { DiscoverTeaser } from './discover-teaser'
+
+const DiscoverTeaser = dynamic(
+  () => import('./discover-teaser').then(m => ({ default: m.DiscoverTeaser })),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="p-4 sm:p-6 rounded-2xl bg-card border border-border h-48 animate-pulse" />
+    ),
+  }
+)
 
 interface Props {
   applications: Application[]
@@ -58,35 +68,36 @@ export function DashboardClient({ applications, profile }: Props) {
   const chartColors = useChartColors()
 
   return (
-    <div className="px-8 py-10 space-y-6">
+    <div className="px-4 py-6 sm:px-8 sm:py-10 space-y-4 sm:space-y-6">
 
       {/* Header */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-wrap items-start justify-between gap-3 mb-6 sm:mb-8">
         <div>
-          <h1 className="text-2xl font-bold mb-1">
+          <h1 className="text-xl sm:text-2xl font-bold mb-1">
             {profile?.full_name
-              ? `Hey, ${profile.full_name.split(' ')[0]} 👋`
+              ? `Hello ${profile.full_name.split(' ')[0]},`
               : 'Dashboard'}
           </h1>
           <p className="text-sm text-muted">Here's how your job search is going.</p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           <ExportButton
             applications={applications}
             profileName={profile?.full_name}
           />
           <Link
             href="/applications/new"
-            className="flex items-center gap-2 px-4 py-2.5 bg-primary hover:bg-primary/90 text-white text-sm font-medium rounded-xl transition-colors"
+            className="flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2.5 bg-primary hover:bg-primary/90 text-white text-sm font-medium rounded-xl transition-colors whitespace-nowrap"
           >
             <Plus size={16} />
-            New Application
+            <span className="hidden xs:inline">New Application</span>
+            <span className="xs:hidden">New</span>
           </Link>
         </div>
       </div>
 
       {/* Stat cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <StatCard
           icon={BriefcaseBusiness}
           label="Total Applied"
@@ -112,24 +123,24 @@ export function DashboardClient({ applications, profile }: Props) {
           icon={Target}
           label="Avg Match"
           value={stats.avgMatch !== null ? `${stats.avgMatch}%` : '—'}
-          sub="vs your skill profile"
+          sub="vs your profile"
           color="#F59E0B"
           mono
         />
       </div>
 
       {/* Charts row — area chart + radar */}
-      <div className="grid lg:grid-cols-3 gap-4">
-        <div className="lg:col-span-2 p-6 rounded-2xl bg-card border border-border">
-          <div className="flex items-center justify-between mb-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div className="lg:col-span-2 p-4 sm:p-6 rounded-2xl bg-card border border-border">
+          <div className="flex items-center justify-between mb-4 sm:mb-6">
             <div>
-              <h2 className="font-semibold">Applications over time</h2>
+              <h2 className="font-semibold text-sm sm:text-base">Applications over time</h2>
               <p className="text-xs text-muted mt-0.5">Last 8 weeks</p>
             </div>
             <TrendingUp size={18} className="text-muted" />
           </div>
           {stats.timeline.length > 0 ? (
-            <ResponsiveContainer width="100%" height={200}>
+            <ResponsiveContainer width="100%" height={180}>
               <AreaChart data={stats.timeline} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
                 <defs>
                   <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
@@ -140,15 +151,17 @@ export function DashboardClient({ applications, profile }: Props) {
                 <CartesianGrid strokeDasharray="3 3" stroke={chartColors.grid} vertical={false} />
                 <XAxis
                   dataKey="week"
-                  tick={{ fill: chartColors.text, fontSize: 11 }}
+                  tick={{ fill: chartColors.text, fontSize: 10 }}
                   axisLine={false}
                   tickLine={false}
+                  interval="preserveStartEnd"
                 />
                 <YAxis
-                  tick={{ fill: chartColors.text, fontSize: 11 }}
+                  tick={{ fill: chartColors.text, fontSize: 10 }}
                   axisLine={false}
                   tickLine={false}
                   allowDecimals={false}
+                  width={24}
                 />
                 <Tooltip content={<CustomTooltip />} />
                 <Area
@@ -169,24 +182,24 @@ export function DashboardClient({ applications, profile }: Props) {
       </div>
 
       {/* Status breakdown + Discover teaser */}
-      <div className="grid lg:grid-cols-2 gap-4">
-        <div className="p-6 rounded-2xl bg-card border border-border">
-          <div className="flex items-center justify-between mb-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className="p-4 sm:p-6 rounded-2xl bg-card border border-border">
+          <div className="flex items-center justify-between mb-4 sm:mb-6">
             <div>
-              <h2 className="font-semibold">Status breakdown</h2>
+              <h2 className="font-semibold text-sm sm:text-base">Status breakdown</h2>
               <p className="text-xs text-muted mt-0.5">{stats.total} total</p>
             </div>
           </div>
           {stats.statusBreakdown.length > 0 ? (
             <>
-              <ResponsiveContainer width="100%" height={160}>
+              <ResponsiveContainer width="100%" height={150}>
                 <PieChart>
                   <Pie
                     data={stats.statusBreakdown}
                     cx="50%"
                     cy="50%"
-                    innerRadius={45}
-                    outerRadius={70}
+                    innerRadius={40}
+                    outerRadius={65}
                     paddingAngle={3}
                     dataKey="count"
                   >
@@ -213,7 +226,7 @@ export function DashboardClient({ applications, profile }: Props) {
                   <div key={s.status} className="flex items-center justify-between text-xs">
                     <div className="flex items-center gap-2">
                       <div
-                        className="w-2 h-2 rounded-full"
+                        className="w-2 h-2 rounded-full shrink-0"
                         style={{ backgroundColor: STATUS_COLORS[s.status] }}
                       />
                       <span className="text-muted">{s.label}</span>
@@ -230,28 +243,29 @@ export function DashboardClient({ applications, profile }: Props) {
       </div>
 
       {/* Match score bar chart */}
-      <div className="p-6 rounded-2xl bg-card border border-border">
-        <div className="flex items-center justify-between mb-6">
+      <div className="p-4 sm:p-6 rounded-2xl bg-card border border-border">
+        <div className="flex items-center justify-between mb-4 sm:mb-6">
           <div>
-            <h2 className="font-semibold">Match score distribution</h2>
+            <h2 className="font-semibold text-sm sm:text-base">Match score distribution</h2>
             <p className="text-xs text-muted mt-0.5">How well your skills match each role</p>
           </div>
         </div>
         {stats.matchDistribution.some(d => d.count > 0) ? (
-          <ResponsiveContainer width="100%" height={160}>
+          <ResponsiveContainer width="100%" height={150}>
             <BarChart data={stats.matchDistribution} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke={chartColors.grid} vertical={false} />
               <XAxis
                 dataKey="range"
-                tick={{ fill: chartColors.text, fontSize: 11 }}
+                tick={{ fill: chartColors.text, fontSize: 10 }}
                 axisLine={false}
                 tickLine={false}
               />
               <YAxis
-                tick={{ fill: chartColors.text, fontSize: 11 }}
+                tick={{ fill: chartColors.text, fontSize: 10 }}
                 axisLine={false}
                 tickLine={false}
                 allowDecimals={false}
+                width={24}
               />
               <Tooltip content={<CustomTooltip label="applications" />} />
               <Bar dataKey="count" radius={[6, 6, 0, 0]}>
@@ -271,9 +285,9 @@ export function DashboardClient({ applications, profile }: Props) {
       </div>
 
       {/* Recent applications */}
-      <div className="p-6 rounded-2xl bg-card border border-border">
-        <div className="flex items-center justify-between mb-5">
-          <h2 className="font-semibold">Recent applications</h2>
+      <div className="p-4 sm:p-6 rounded-2xl bg-card border border-border">
+        <div className="flex items-center justify-between mb-4 sm:mb-5">
+          <h2 className="font-semibold text-sm sm:text-base">Recent applications</h2>
           <Link
             href="/applications"
             className="flex items-center gap-1 text-xs text-primary hover:text-primary/80 transition-colors"
@@ -299,18 +313,18 @@ export function DashboardClient({ applications, profile }: Props) {
               <Link
                 key={app.id}
                 href={`/applications/${app.id}`}
-                className="flex items-center justify-between px-4 py-3 rounded-xl hover:bg-white/5 transition-colors group"
+                className="flex items-center justify-between px-3 py-3 sm:px-4 rounded-xl hover:bg-white/5 transition-colors group"
               >
                 <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-3">
-                    <p className="font-medium text-sm truncate">{app.company}</p>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <p className="font-medium text-sm truncate max-w-[120px] sm:max-w-none">{app.company}</p>
                     <StatusBadge status={app.status} />
                   </div>
                   <p className="text-xs text-muted truncate mt-0.5">{app.position}</p>
                 </div>
-                <div className="flex items-center gap-3 ml-4 shrink-0">
+                <div className="flex items-center gap-2 sm:gap-3 ml-2 sm:ml-4 shrink-0">
                   <MatchScoreBadge score={app.match_score} />
-                  <span className="text-xs text-muted font-mono">
+                  <span className="text-xs text-muted font-mono hidden sm:inline">
                     {new Date(app.applied_date).toLocaleDateString('en-MY', {
                       day: 'numeric', month: 'short'
                     })}
@@ -328,7 +342,7 @@ export function DashboardClient({ applications, profile }: Props) {
 
       {/* Profile nudge if skills empty */}
       {(!profile?.skills || profile.skills.length === 0) && (
-        <div className="flex items-center justify-between p-5 rounded-2xl bg-primary/10 border border-primary/20">
+        <div className="flex flex-wrap items-center justify-between gap-3 p-4 sm:p-5 rounded-2xl bg-primary/10 border border-primary/20">
           <div>
             <p className="font-semibold text-sm">Complete your profile</p>
             <p className="text-xs text-muted mt-0.5">
@@ -359,16 +373,17 @@ function StatCard({
   mono?: boolean
 }) {
   return (
-    <div className="p-5 rounded-2xl bg-card border border-border">
+    <div className="p-4 sm:p-5 rounded-2xl bg-card border border-border">
       <div
-        className="w-9 h-9 rounded-xl flex items-center justify-center mb-4"
+        className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center mb-3 sm:mb-4"
         style={{ backgroundColor: `${color}18` }}
       >
-        <Icon size={18} style={{ color }} />
+        <Icon size={16} style={{ color }} className="sm:hidden" />
+        <Icon size={18} style={{ color }} className="hidden sm:block" />
       </div>
-      <p className={`text-2xl font-bold mb-1 ${mono ? 'font-mono' : ''}`}>{value}</p>
-      <p className="text-xs font-medium text-foreground mb-0.5">{label}</p>
-      <p className="text-xs text-muted">{sub}</p>
+      <p className={`text-xl sm:text-2xl font-bold mb-1 ${mono ? 'font-mono' : ''}`}>{value}</p>
+      <p className="text-xs font-medium text-foreground mb-0.5 leading-tight">{label}</p>
+      <p className="text-xs text-muted leading-tight">{sub}</p>
     </div>
   )
 }
@@ -387,7 +402,7 @@ function CustomTooltip({ active, payload, label: axisLabel, label: propLabel }: 
 
 function ChartEmpty() {
   return (
-    <div className="flex items-center justify-center h-40 text-sm text-muted">
+    <div className="flex items-center justify-center h-36 text-xs sm:text-sm text-muted text-center px-4">
       Not enough data yet — keep adding applications.
     </div>
   )

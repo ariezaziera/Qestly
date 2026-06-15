@@ -97,21 +97,30 @@ export function RadarWidget({ applications }: Props) {
           <div className="absolute top-0 left-1/2 w-px h-full bg-accent/10" />
           <div className="absolute top-1/2 left-0 w-full h-px bg-accent/10" />
 
-          {/* Sweep */}
+          {/* Sweep — single rotating container anchored at radar center */}
           <div
-            className="absolute top-1/2 left-1/2 w-1/2 h-px origin-left animate-radar-sweep"
+            className="absolute animate-radar-sweep"
             style={{
-              background: 'linear-gradient(90deg, #22D3EE, transparent)',
+              top: '50%',
+              left: '50%',
+              width: '50%',
+              height: '50%',
+              transformOrigin: '0% 0%',
+              background: 'conic-gradient(from -50deg at 0% 0%, rgba(34,211,238,0.35) 0deg, rgba(34,211,238,0.15) 30deg, transparent 60deg)',
             }}
-          />
-          {/* Sweep glow cone */}
-          <div
-            className="absolute top-1/2 left-1/2 w-1/2 h-1/2 origin-bottom-left animate-radar-sweep opacity-20"
-            style={{
-              background: 'conic-gradient(from 0deg, #22D3EE 0deg, transparent 40deg)',
-              borderRadius: '0 100% 0 0',
-            }}
-          />
+          >
+            {/* Line along the top edge = the sweep arm */}
+            <div
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '1px',
+                background: 'linear-gradient(90deg, #22D3EE, transparent)',
+              }}
+            />
+          </div>
 
           {/* Center dot */}
           <div className="absolute top-1/2 left-1/2 w-2 h-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent shadow-[0_0_8px_#22D3EE]" />
