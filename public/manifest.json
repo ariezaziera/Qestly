@@ -1,6 +1,6 @@
 {
-  "name": "JobRadar",
-  "short_name": "JobRadar",
+  "name": "Qestly",
+  "short_name": "Qestly",
   "description": "Track Every Application, Land Every Opportunity",
   "start_url": "/dashboard",
   "display": "standalone",
