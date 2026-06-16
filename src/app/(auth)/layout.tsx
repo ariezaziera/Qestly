@@ -18,7 +18,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
               <circle cx="8" cy="8" r="7.2" stroke="white" strokeWidth="0.8" strokeOpacity="0.4" fill="none" />
             </svg>
           </div>
-          <span className="font-bold text-xl tracking-tight">JobRadar</span>
+          <span className="font-bold text-xl tracking-tight">Qestly</span>
         </div>
 
         {/* Center content */}
@@ -66,7 +66,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
                 <circle cx="8" cy="8" r="7.2" stroke="white" strokeWidth="0.8" strokeOpacity="0.4" fill="none" />
               </svg>
             </div>
-            <span className="font-bold text-lg">JobRadar</span>
+            <span className="font-bold text-lg">Qestly</span>
           </div>
           {children}
         </div>
