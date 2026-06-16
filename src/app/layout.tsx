@@ -21,7 +21,7 @@ export const viewport: Viewport = {
 }
 
 export const metadata: Metadata = {
-  title: 'JobRadar — Track Every Application, Land Every Opportunity',
+  title: 'Qestly — Main Quest: Get Hired!',
   description: 'AI-powered job application tracker. Paste a URL, Gemini extracts everything, track your pipeline from first click to signed offer.',
   manifest: '/manifest.json',
   appleWebApp: {
