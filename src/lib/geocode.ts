@@ -20,7 +20,7 @@ export async function geocodeLocation(location: string | null): Promise<GeocodeR
       {
         headers: {
           // Nominatim requires a User-Agent identifying the app
-          'User-Agent': 'JobRadar/1.0 (job application tracker)',
+          'User-Agent': 'Qestly/1.0 (job application tracker)',
         },
       }
     )
