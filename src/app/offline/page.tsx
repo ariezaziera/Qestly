@@ -12,7 +12,7 @@ export default function OfflinePage() {
         </div>
         <h1 className="text-2xl font-bold mb-3">You're offline</h1>
         <p className="text-muted text-sm leading-relaxed mb-8">
-          JobRadar needs a connection to sync your applications.
+          Qestly needs a connection to sync your applications.
           Pages you've visited recently are still available.
         </p>
         <div className="flex flex-col gap-3">
@@ -33,7 +33,7 @@ export default function OfflinePage() {
           <div className="w-6 h-6 rounded-md bg-primary flex items-center justify-center">
             <Radar size={12} color="white" />
           </div>
-          <span className="text-sm font-medium">JobRadar</span>
+          <span className="text-sm font-medium">Qestly</span>
         </div>
       </div>
     </div>
