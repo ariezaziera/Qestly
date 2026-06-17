@@ -133,7 +133,7 @@ export function exportToPDF(
   doc.setTextColor(...TEXT)
   doc.setFontSize(20)
   doc.setFont('helvetica', 'bold')
-  doc.text('JobRadar', 36, 33)
+  doc.text('Qestly', 36, 33)
 
   // Tagline
   doc.setTextColor(...MUTED)
