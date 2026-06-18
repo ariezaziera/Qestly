@@ -2,12 +2,12 @@
 
 **Main quest: get hired.**
 
-Qestly is an AI-powered job application tracker built for serious job seekers.
-Paste a job listing URL and Groq AI (Llama 3.3 70B) auto-extracts the company,
-role, required skills, salary range, and experience level. Track your entire
-pipeline from first click to signed offer — with skill match scoring, a Kanban
-board, map view, analytics dashboard, AI-generated cover letters, interview
-prep, and email reminders.
+Qestly is an AI-powered job application tracker built for serious job
+seekers. Paste a job listing URL and Groq AI (Llama 3.3 70B) auto-extracts
+the company, role, required skills, salary range, and experience level.
+Track your entire pipeline from first click to signed offer — with skill
+match scoring, a Kanban board, map view, analytics dashboard, AI-generated
+cover letters, interview prep, and email reminders.
 
 ---
 
@@ -20,7 +20,7 @@ prep, and email reminders.
 - 🎯 **Skill Match Scoring** — Compares your profile skills against job requirements
 - 📊 **Analytics Dashboard** — Application volume, status breakdown, response rates
 - 🌍 **Map View** — See your applications plotted on an interactive Leaflet map
-- 🔍 **Job Discovery** — Browse relevant jobs from Adzuna with AI fit scoring and reasoning
+- 🔍 **Job Discovery** — Browse relevant jobs from Jooble with AI fit scoring and reasoning
 - ✉️ **AI Cover Letters** — Generate tailored cover letters per application
 - 🧠 **Interview Prep** — AI-generated prep notes based on the job description
 - 🔔 **Email Reminders** — Schedule follow-up, interview, and deadline reminders via Resend
@@ -37,23 +37,25 @@ prep, and email reminders.
 ---
 
 ## 🛠️ Tech Stack
-
-| Layer | Technology |
-|-------|-----------|
-| Framework | Next.js 16 (App Router, TypeScript) |
-| Styling | Tailwind CSS v4 |
-| Database & Auth | Supabase (Postgres + RLS) |
-| AI | Groq API (Llama 3.3 70B) |
-| Data Fetching | TanStack React Query |
-| Forms | React Hook Form + Zod |
-| Drag & Drop | dnd-kit |
-| Charts | Recharts |
-| Maps | Leaflet + react-leaflet |
-| Email | Resend |
-| Job Data | Adzuna API |
-| Export | jsPDF + jspdf-autotable |
-| PWA | next-pwa |
-| Fonts | Syne + JetBrains Mono |
+|-------------------|---------------------------------------|
+| Layer             | Technology                            |
+|-------------------|---------------------------------------|
+| Framework         | Next.js 16 (App Router, TypeScript)   |
+| Styling           | Tailwind CSS v4                       |
+| Database & Auth   | Supabase (Postgres + RLS)             |
+| AI                | Groq API (Llama 3.3 70B)              |
+| Data Fetching     | TanStack React Query                  |
+| Forms             | React Hook Form + Zod                 |
+| Drag & Drop       | dnd-kit                               |
+| Charts            | Recharts                              |
+| Maps              | Leaflet + react-leaflet               |
+| Geocoding         | OpenStreetMap Nominatim               |
+| Email             | Resend                                |
+| Job Data          | Jooble API                            |
+| Export            | jsPDF + jspdf-autotable               |
+| PWA               | next-pwa                              |
+| Fonts             | Syne + JetBrains Mono                 |
+|-------------------|---------------------------------------|
 
 ---
 
@@ -65,14 +67,14 @@ prep, and email reminders.
 - A [Supabase](https://supabase.com) project
 - A [Groq API](https://console.groq.com/) key
 - A [Resend](https://resend.com) account (for email reminders)
-- An [Adzuna API](https://developer.adzuna.com/) key (for job discovery)
+- A [Jooble API](https://jooble.org/api/about) key (for job discovery)
 
 ### Setup
 
 1. Clone the repo and install dependencies:
 
 ```bash
-git clone https://github.com/your-username/qestly.git
+git clone https://github.com/ariezaaziera/qestly.git
 cd qestly
 npm install
 ```
@@ -82,10 +84,12 @@ npm install
 ```env
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+NEXT_PUBLIC_APP_URL=http://localhost:3000
 GROQ_API_KEY=your_groq_api_key
 RESEND_API_KEY=your_resend_api_key
-ADZUNA_APP_ID=your_adzuna_app_id
-ADZUNA_APP_KEY=your_adzuna_app_key
+RESEND_FROM_EMAIL=your_verified_sender_email
+JOOBLE_API_KEY=your_jooble_api_key
+CRON_SECRET=your_cron_secret
 ```
 
 3. Run the Supabase schema migration via the SQL Editor in your Supabase
@@ -116,14 +120,15 @@ src/
 │   ├── board/            # Kanban card components
 │   ├── dashboard/        # Dashboard charts and widgets
 │   ├── layout/           # Sidebar and mobile nav
-│   ├── map/              # Leaflet map components
-│   └── ui/               # Reusable UI primitives
+│   ├── map/               # Leaflet map components
+│   └── ui/                # Reusable UI primitives
 ├── hooks/                # React Query hooks
 ├── lib/
 │   ├── supabase/         # Browser & server Supabase clients
 │   ├── email/            # Email templates and sending logic
 │   ├── export.ts         # PDF/CSV export
-│   ├── geocode.ts        # Location geocoding
+│   ├── geocode.ts        # Location geocoding (Nominatim)
+│   ├── jooble.ts          # Job discovery search
 │   └── utils.ts          # Shared helpers, status colors/labels
 ├── providers/            # React Query and theme providers
 ├── proxy.ts              # Route protection middleware
@@ -150,12 +155,14 @@ in the Vercel dashboard.
 vercel deploy
 ```
 
+Live at [qestly.vercel.app](https://qestly.vercel.app).
+
 ---
 
 ## 👩‍💻 Built By
 
 **Arieza Aziera** — Frontend & Full-Stack Developer
-- Portfolio: [ariezaaziera.studio](https://ariezaaziera.studio)
+- Portfolio: [ariezaaziera-studio.vercel.app](https://ariezaaziera-studio.vercel.app)
 - GitHub: [@ariezaaziera](https://github.com/ariezaaziera)
 
 ---
@@ -168,5 +175,3 @@ vercel deploy
 ## 📄 License
 
 Personal project — license TBD.
-
-```
