@@ -38,7 +38,7 @@ function Nav() {
           </Link>
           <Link
             href="/register"
-            className="text-xs sm:text-sm bg-primary hover:bg-primary/90 text-secondary px-3 py-2 rounded-lg transition-colors font-medium"
+            className="text-xs sm:text-sm bg-primary hover:bg-primary/90 text-on-primary px-3 py-2 rounded-lg transition-colors font-medium"
           >
             Get started
           </Link>
@@ -72,9 +72,9 @@ function Logo() {
 function Hero() {
   return (
     <section className="pt-28 pb-20 px-8 relative">
-      <div className="glow-blob absolute top-20 left-1/2 -translate-x-1/2 w-[600px] h-[400px] bg-primary/15 rounded-full blur-[130px] pointer-events-none" />
-      <div className="glow-blob absolute top-32 left-1/4 w-[300px] h-[300px] bg-secondary/10 rounded-full blur-[100px] pointer-events-none" />
-      <div className="glow-blob absolute top-40 right-1/4 w-[250px] h-[250px] bg-accent/8 rounded-full blur-[90px] pointer-events-none" />
+      <div className="glow-blob absolute top-20 left-1/2 -translate-x-1/2 w-[600px] h-[400px] bg-primary/50 dark:bg-primary/15 rounded-full blur-[100px] dark:blur-[130px] pointer-events-none" />
+      <div className="glow-blob absolute top-32 left-1/4 w-[300px] h-[300px] bg-secondary/20 dark:bg-secondary/10 rounded-full blur-[80px] dark:blur-[100px] pointer-events-none" />
+      <div className="glow-blob absolute top-40 right-1/4 w-[250px] h-[250px] bg-accent/15 dark:bg-accent/8 rounded-full blur-[70px] dark:blur-[90px] pointer-events-none" />
 
       <div className="max-w-4xl mx-auto text-center relative">
         {/* Badge */}
@@ -93,17 +93,17 @@ function Hero() {
 
         <p className="text-base sm:text-lg text-muted max-w-xl mx-auto mb-8 leading-relaxed">
           Paste a job URL. Qestly extracts everything —{' '}
-          <span className="text-secondary font-medium">company</span>,{' '}
-          <span className="text-secondary font-medium">role</span>,{' '}
-          <span className="text-secondary font-medium">skills</span>,{' '}
-          <span className="text-secondary font-medium">salary</span>{' '}
+          <span className="text-primary font-medium">company</span>,{' '}
+          <span className="text-primary font-medium">role</span>,{' '}
+          <span className="text-primary font-medium">skills</span>,{' '}
+          <span className="text-primary font-medium">salary</span>{' '}
           — and tracks your pipeline from first click to signed offer.
         </p>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
           <Link
             href="/register"
-            className="w-full sm:w-auto px-7 py-3 bg-primary hover:bg-primary/90 text-secondary font-semibold rounded-xl transition-all hover:shadow-[0_0_30px_rgba(244,197,66,0.35)] text-center text-sm"
+            className="w-full sm:w-auto px-7 py-3 bg-primary hover:bg-primary/90 text-on-primary font-semibold rounded-xl transition-all hover:shadow-[0_0_30px_rgba(244,197,66,0.35)] text-center text-sm"
           >
             Start tracking free
           </Link>
@@ -365,7 +365,7 @@ function CTA() {
 
             <Link
               href="/register"
-              className="inline-block px-10 py-4 bg-primary hover:bg-primary/90 text-secondary font-semibold rounded-xl transition-all hover:shadow-[0_0_40px_rgba(244,197,66,0.4)] dark:hover:shadow-[0_0_40px_rgba(246,211,101,0.4)]"
+              className="inline-block px-10 py-4 bg-primary hover:bg-primary/90 text-on-primary font-semibold rounded-xl transition-all hover:shadow-[0_0_40px_rgba(244,197,66,0.4)] dark:hover:shadow-[0_0_40px_rgba(246,211,101,0.4)]"
             >
               Create your free account
             </Link>

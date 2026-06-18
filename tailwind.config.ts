@@ -15,6 +15,7 @@ const config: Config = {
         muted:      'rgb(var(--color-muted) / <alpha-value>)',
         foreground: 'rgb(var(--color-foreground) / <alpha-value>)',
         error:      'rgb(var(--color-error) / <alpha-value>)',      // ← add
+        'on-primary': 'rgb(var(--color-on-primary) / <alpha-value>)',
       },
       fontFamily: {
         sans: ['Syne', 'sans-serif'],
