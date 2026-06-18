@@ -122,7 +122,7 @@ export default function RegisterPage() {
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-3 top-[38px] text-muted-foreground hover:text-foreground transition-colors focus:outline-none"
+            className="absolute right-3 top-9.5 text-muted-foreground hover:text-foreground transition-colors focus:outline-none"
             tabIndex={-1}
             aria-label={showPassword ? 'Hide password' : 'Show password'}
           >
@@ -149,7 +149,7 @@ export default function RegisterPage() {
           <button
             type="button"
             onClick={() => setShowConfirm(!showConfirm)} // FIXED: use setShowConfirm
-            className="absolute right-3 top-[38px] text-muted-foreground hover:text-foreground transition-colors focus:outline-none"
+            className="absolute right-3 top-9.5 text-muted-foreground hover:text-foreground transition-colors focus:outline-none"
             tabIndex={-1}
             aria-label={showConfirm ? 'Hide confirm password' : 'Show confirm password'}
           >
