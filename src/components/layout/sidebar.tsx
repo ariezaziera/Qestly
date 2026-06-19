@@ -9,6 +9,7 @@ import {
   Kanban, User, LogOut, Plus, Map, Compass
 } from 'lucide-react'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
+import { AvatarMenu } from '@/components/layout/avatar-menu'
 
 const NAV = [
   { href: '/dashboard',    icon: LayoutDashboard,   label: 'Dashboard'    },
@@ -19,7 +20,12 @@ const NAV = [
   { href: '/profile',      icon: User,              label: 'Profile'      },
 ]
 
-export function Sidebar() {
+type SidebarProps = {
+  userEmail?: string | null
+  userAvatarUrl?: string | null
+}
+
+export function Sidebar({ userEmail, userAvatarUrl }: SidebarProps) {
   const pathname = usePathname()
   const router = useRouter()
 
@@ -32,8 +38,8 @@ export function Sidebar() {
 
   return (
     <aside className="fixed left-0 top-0 h-full w-60 bg-card border-r border-border flex flex-col z-40">
-      {/* Logo */}
-      <div className="p-6 border-b border-border">
+      {/* Logo + avatar */}
+      <div className="p-6 border-b border-border flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
             <svg width="20" height="20" viewBox="0 0 512 512" fill="none">
@@ -49,13 +55,14 @@ export function Sidebar() {
           </div>
           <span className="font-bold text-lg tracking-tight">Qestly</span>
         </div>
+        <AvatarMenu userEmail={userEmail} userAvatarUrl={userAvatarUrl} align="right" />
       </div>
 
       {/* New application CTA */}
       <div className="p-4 border-b border-border">
         <Link
           href="/applications/new"
-          className="flex items-center justify-center gap-2 w-full py-2.5 bg-primary hover:bg-primary/90 text-white text-sm font-medium rounded-xl transition-colors"
+          className="flex items-center justify-center gap-2 w-full py-2.5 bg-primary hover:bg-primary/90 text-on-primary text-sm font-medium rounded-xl transition-colors"
         >
           <Plus size={16} />
           New Application
@@ -84,20 +91,20 @@ export function Sidebar() {
         })}
       </nav>
 
-      {/* Sign out + theme */}
-        <div className="p-4 border-t border-border space-y-1">
-            <div className="flex items-center justify-between px-1">
-                <span className="text-xs text-muted px-2">Appearance</span>
-                <ThemeToggle />
-            </div>
-            <button
-                onClick={signOut}
-                className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-muted hover:text-foreground hover:bg-white/5 transition-colors w-full"
-            >
-                <LogOut size={18} />
-                Sign out
-            </button>
+      {/* Sign out + theme — unchanged, stays as is */}
+      <div className="p-4 border-t border-border space-y-1">
+        <div className="flex items-center justify-between px-1">
+          <span className="text-xs text-muted px-2">Appearance</span>
+          <ThemeToggle />
         </div>
+        <button
+          onClick={signOut}
+          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-muted hover:text-foreground hover:bg-white/5 transition-colors w-full"
+        >
+          <LogOut size={18} />
+          Sign out
+        </button>
+      </div>
     </aside>
   )
 }
