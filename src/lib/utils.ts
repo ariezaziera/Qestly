@@ -5,15 +5,18 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-// DYNAMIC URL HELPER — guna NEXT_PUBLIC_APP_URL
+// DYNAMIC URL HELPER — guna window.location.origin client-side
 export const getURL = () => {
+  // Client-side: guna window.location.origin (lebih reliable)
+  if (typeof window !== 'undefined') {
+    const origin = window.location.origin
+    return origin.endsWith('/') ? origin.slice(0, -1) : origin
+  }
+  
+  // Server-side: guna env variable
   let url = process?.env?.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
-  
-  // Pastikan ada http:// atau https://
   url = url.startsWith('http') ? url : `https://${url}`
-  // Pastikan takde trailing slash
   url = url.endsWith('/') ? url.slice(0, -1) : url
-  
   return url
 }
 
