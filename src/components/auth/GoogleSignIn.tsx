@@ -1,6 +1,7 @@
 'use client'
 
 import { createClient } from '@/lib/supabase/client'
+import { getURL } from '@/lib/utils'
 
 function GoogleIcon() {
   return (
@@ -17,8 +18,7 @@ export function GoogleSignIn() {
   const supabase = createClient()
 
   const handleGoogleSignIn = async () => {
-    // Hardcode untuk production
-    const redirectTo = 'https://qestly.vercel.app/auth/callback'
+    const redirectTo = `${getURL()}/auth/callback`
 
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
