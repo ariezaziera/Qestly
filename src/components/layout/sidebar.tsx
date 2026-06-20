@@ -1,12 +1,14 @@
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
 import {
   Radar, LayoutDashboard, BriefcaseBusiness,
-  Kanban, User, LogOut, Plus, Map, Compass
+  Kanban, User, LogOut, Plus, Map, Compass,
+  ChevronLeft, ChevronRight
 } from 'lucide-react'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
 import { AvatarMenu } from '@/components/layout/avatar-menu'
@@ -28,6 +30,7 @@ type SidebarProps = {
 export function Sidebar({ userEmail, userAvatarUrl }: SidebarProps) {
   const pathname = usePathname()
   const router = useRouter()
+  const [expanded, setExpanded] = useState(false)
 
   async function signOut() {
     const supabase = createClient()
@@ -37,11 +40,19 @@ export function Sidebar({ userEmail, userAvatarUrl }: SidebarProps) {
   }
 
   return (
-    <aside className="fixed left-0 top-0 h-full w-60 bg-card border-r border-border flex flex-col z-40">
+    <aside
+      className={cn(
+        'fixed left-0 top-0 h-full bg-card border-r border-border flex flex-col z-40 transition-[width] duration-200',
+        expanded ? 'w-60' : 'w-[72px]'
+      )}
+    >
       {/* Logo + avatar */}
-      <div className="p-6 border-b border-border flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+      <div className={cn(
+        'p-4 border-b border-border flex items-center',
+        expanded ? 'justify-between' : 'flex-col gap-3'
+      )}>
+        <div className={cn('flex items-center', expanded ? 'gap-2' : '')}>
+          <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
             <svg width="20" height="20" viewBox="0 0 512 512" fill="none">
               <g transform="translate(0, 20)">
                 <path d="M 56,256 A200,200 0 0,1 456,256" fill="none" stroke="#f6d365" strokeWidth="20" strokeLinecap="round" opacity="0.5"/>
@@ -53,56 +64,89 @@ export function Sidebar({ userEmail, userAvatarUrl }: SidebarProps) {
               </g>
             </svg>
           </div>
-          <span className="font-bold text-lg tracking-tight">Qestly</span>
+          {expanded && <span className="font-bold text-lg tracking-tight whitespace-nowrap">Qestly</span>}
         </div>
-        <AvatarMenu userEmail={userEmail} userAvatarUrl={userAvatarUrl} align="right" />
+        {expanded && <AvatarMenu userEmail={userEmail} userAvatarUrl={userAvatarUrl} align="right" />}
+        {!expanded && <AvatarMenu userEmail={userEmail} userAvatarUrl={userAvatarUrl} align="left" />}
       </div>
 
       {/* New application CTA */}
-      <div className="p-4 border-b border-border">
+      <div className="p-3 border-b border-border">
         <Link
           href="/applications/new"
-          className="flex items-center justify-center gap-2 w-full py-2.5 bg-primary hover:bg-primary/90 text-on-primary text-sm font-medium rounded-xl transition-colors"
+          title={!expanded ? 'New Application' : undefined}
+          className={cn(
+            'flex items-center justify-center gap-2 w-full py-2.5 bg-primary hover:bg-primary/90 text-on-primary text-sm font-medium rounded-xl transition-colors',
+            !expanded && 'px-0'
+          )}
         >
-          <Plus size={16} />
-          New Application
+          <Plus size={16} className="shrink-0" />
+          {expanded && <span className="whitespace-nowrap">New Application</span>}
         </Link>
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 p-4 space-y-1">
+      <nav className="flex-1 p-3 space-y-1">
         {NAV.map(({ href, icon: Icon, label }) => {
           const active = pathname === href || pathname.startsWith(href + '/')
           return (
             <Link
               key={href}
               href={href}
+              title={!expanded ? label : undefined}
               className={cn(
                 'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-colors',
+                !expanded && 'justify-center px-0',
                 active
                   ? 'bg-primary/15 text-primary font-medium'
                   : 'text-muted hover:text-foreground hover:bg-white/5'
               )}
             >
-              <Icon size={18} />
-              {label}
+              <Icon size={18} className="shrink-0" />
+              {expanded && <span className="whitespace-nowrap">{label}</span>}
             </Link>
           )
         })}
       </nav>
 
-      {/* Sign out + theme — unchanged, stays as is */}
-      <div className="p-4 border-t border-border space-y-1">
-        <div className="flex items-center justify-between px-1">
-          <span className="text-xs text-muted px-2">Appearance</span>
-          <ThemeToggle />
-        </div>
+      {/* Sign out + theme */}
+      <div className="p-3 border-t border-border space-y-1">
+        {expanded ? (
+          <div className="flex items-center justify-between px-1">
+            <span className="text-xs text-muted px-2">Appearance</span>
+            <ThemeToggle />
+          </div>
+        ) : (
+          <div className="flex justify-center">
+            <ThemeToggle />
+          </div>
+        )}
         <button
           onClick={signOut}
-          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-muted hover:text-foreground hover:bg-white/5 transition-colors w-full"
+          title={!expanded ? 'Sign out' : undefined}
+          className={cn(
+            'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-muted hover:text-foreground hover:bg-white/5 transition-colors w-full',
+            !expanded && 'justify-center px-0'
+          )}
         >
-          <LogOut size={18} />
-          Sign out
+          <LogOut size={18} className="shrink-0" />
+          {expanded && <span className="whitespace-nowrap">Sign out</span>}
+        </button>
+
+        {/* Expand/collapse toggle */}
+        <button
+          onClick={() => setExpanded(v => !v)}
+          aria-label={expanded ? 'Collapse sidebar' : 'Expand sidebar'}
+          className={cn(
+            'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-muted hover:text-foreground hover:bg-white/5 transition-colors w-full',
+            !expanded && 'justify-center px-0'
+          )}
+        >
+          {expanded
+            ? <ChevronLeft size={18} className="shrink-0" />
+            : <ChevronRight size={18} className="shrink-0" />
+          }
+          {expanded && <span className="whitespace-nowrap">Collapse</span>}
         </button>
       </div>
     </aside>
